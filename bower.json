@@ -1,0 +1,23 @@
+{
+  "name": "Frontend for CBR-System",
+  "authors": [
+    "Laberbear",
+    "chlie"
+  ],
+  "description": "This is the main user interface for the Case-Based-Reasoning System",
+  "main": "index.html",
+  "moduleType": [],
+  "license": "EPL",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-material": "~1.0.5",
+    "angular": "1.5.0"
+  }
+}
