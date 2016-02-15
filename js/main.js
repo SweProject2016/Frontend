@@ -11,8 +11,17 @@ angular
     // input: is the users' search query
     $http.get('http://localhost:8080/swe/api/sample/get?type=result&size=5&input=Test').
         success(function(data) {
-            $scope.results = data;
-            console.log(data);
+            function compare(a,b) {
+            if (a.similarity > b.similarity)
+              return -1;
+            else if (a.similarity < b.similarity)
+              return 1;
+            else
+              return 0;
+        }
+          data.sort(compare);
+          $scope.results = data;
+          console.log(data);
         });
     /**
      * Supplies a function that will continue to operate until the
