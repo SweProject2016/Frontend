@@ -1,9 +1,19 @@
 angular
   .module('CBSFrontend', ['ngMaterial'])
-  .controller('AppCtrl', function ($scope, $timeout, $mdDialog, $mdSidenav, $log) {
+  .controller('AppCtrl', function ($scope,$http,  $timeout, $mdDialog, $mdSidenav, $log) {
     $scope.toggleLeft = buildDelayedToggler('left');
     $scope.infoClicked = displayInfoBox;
     $scope.retrieveData = displayNotImplemented;
+    //
+    // Currently query is designed like this:
+    // type: should be always result (since we want judgement results)
+    // size: is the number of results that we want in the response
+    // input: is the users' search query
+    $http.get('http://localhost:8080/swe/api/sample/get?type=result&size=5&input=Test').
+        success(function(data) {
+            $scope.results = data;
+            console.log(data);
+        });
     /**
      * Supplies a function that will continue to operate until the
      * time is up.

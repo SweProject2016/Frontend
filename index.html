@@ -16,6 +16,7 @@
 <body id="appContainer" ng-app="CBSFrontend">
   <div ng-controller="AppCtrl" layout="column" style="height:500px;" ng-cloak>
     <section layout="row" flex>
+      <!-- First Row, Currently contains the left menu button, the searchbox and the right info button-->
       <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left">
         <md-toolbar class="md-theme-indigo">
           <h1 class="md-toolbar-tools">Menu</h1>
@@ -44,9 +45,23 @@
         <md-icon aria-label="Info" class="material-icons">info</md-icon>
       </md-button>
     </section>
+    <section layout="row">
+      <md-card ng-repeat="item in results">
+        <md-card-title>
+          <md-card-title-text>
+            <span class="md-headline">{{item.judgement.offence}}</span>
+            <span class="md-subhead">{{item.judgmenet.comittee.name}}</span>
+          </md-card-title-text>
+        </md-card-title>
+        <md-card-content>
+          {{item.judgement.keywords}}
+        </md-card-content>
+        <md-card-actions layout="row" layout-align="end center">
+          <md-button>Passend</md-button>
+          <md-button>Unpassend</md-button>
+        </md-card-actions>
+      </md-card>
+    </section>
   </div>
-
-
 </body>
-
 </html>
