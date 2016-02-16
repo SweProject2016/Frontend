@@ -5,7 +5,8 @@ This is the repository that contains the whole frontend web-interface for the CB
 
 This interface is the be designed by the guidelines described and the mockups shown in the SRS-document.
 
-Mockups:
+##### Mockups:
+
 ![Main App](http://i.imgur.com/h9d4lQy.png)
 ![Result Screen](http://i.imgur.com/bpLCVQd.png)
 ![SideNav](http://i.imgur.com/38gGfpe.png)

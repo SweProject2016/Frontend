@@ -15,18 +15,19 @@
 
 <body id="appContainer" ng-app="CBSFrontend">
   <div ng-controller="AppCtrl" layout="column" style="height:500px;" ng-cloak>
-    <section layout="row" flex>
-      <!-- First Row, Currently contains the left menu button, the searchbox and the right info button-->
-      <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left">
+    <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left">
+      <div ng-controller="SideNavCtrl" id="sideNavContainer">
         <md-toolbar class="md-theme-indigo">
           <h1 class="md-toolbar-tools">Menu</h1>
         </md-toolbar>
         <md-content layout="column" layout-padding ng-controller="LeftCtrl">
-          <md-button class="md-raised">Search Cases</md-button>
-          <md-button class="md-raised md-primary">New Case</md-button>
+          <md-button class="md-raised">Fallsuche</md-button>
           <md-button class="md-raised md-warn">Settings</md-button>
         </md-content>
-      </md-sidenav>
+      </div>
+    </md-sidenav>
+    <section layout="row" ng-Controller="MainInputCtrl" flex>
+      <!-- First Row, Currently contains the left menu button, the searchbox and the right info button-->
       <md-button layout-padding flex="5" ng-click="toggleLeft()" class="md-icon-button" aria-label="Menu">
         <md-icon aria-label="Menu" class="material-icons">menu</md-icon>
       </md-button>
@@ -45,7 +46,7 @@
         <md-icon aria-label="Info" class="material-icons">info</md-icon>
       </md-button>
     </section>
-    <section layout="row">
+    <section ng-controller="ResultCtrl" layout="row">
       <md-card ng-repeat="item in results">
         <md-card-title>
           <md-card-title-text>
@@ -62,6 +63,16 @@
           <md-button>Unpassend</md-button>
         </md-card-actions>
       </md-card>
+    </section>
+    <section layout-align="center center" layout="row" ng-controller="BottomCtrl">
+      <md-button layout-padding ng-click="toggleInfo()" class="md-icon-button" aria-label="Heartbeat">
+        <md-icon style="color:{{heartBeatColor}};font:bold;"  aria-label="favorite" class="material-icons">
+          favorite
+          <md-tooltip md-direction="top">
+            {{heartBeatText}}
+          </md-tooltip>
+        </md-icon>
+      </md-button>
     </section>
   </div>
 </body>
