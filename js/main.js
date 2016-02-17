@@ -15,10 +15,12 @@ angular
   .controller('SideNavCtrl', function($scope){
 
   })
-  .controller('MainInputCtrl', function($scope, $timeout, $mdDialog, $mdSidenav ){
+  .controller('MainInputCtrl', function($scope, $log, restAPI, $http, $timeout, $mdDialog, $mdSidenav ){
     $scope.toggleLeft = buildDelayedToggler('left');
     $scope.infoClicked = displayInfoBox;
-    $scope.retrieveData = displayNotImplemented;
+    $scope.retrieveData = function(){
+      restAPI.updateResults($scope.searchTerm);
+    };
 
 
     /**
@@ -91,43 +93,30 @@ angular
       );
     }
   })
-  .controller('ResultCtrl', function($scope){
-
+  .controller('ResultCtrl', function($scope, restAPI, $interval){
+    $scope.results = restAPI.getResults();
+    function testfunc(){
+      console.log("nice results", restAPI.getResults());
+    };
+    $interval(testfunc, 1000);
   })
   .controller('BottomCtrl', function($scope, $http){
+
+  })
+  .controller('AppCtrl', function ($scope,restAPI, $http, $timeout, $log) {
+    restAPI.updateResults("test");
     checkHeartBeat();
     function checkHeartBeat(){
-      $scope.heartBeatColor = "#D35400";
-      $scope.heartBeatText = "Server not responding";
-      $http.get(generateStatusURI()).success(function(data){
+      $http.get(generateStatusURI()).then(function successCallback(data){
         if(data.server == "running"){
-          $scope.heartBeatColor = "#2ECC71";
-          $scope.heartBeatText = "Server Responded!";
+          console.log("server is running");
+          $scope.serverConnectionLost = false;
         }
+      }, function errorCallback(response) {
+        $scope.serverConnectionLost = true;
       });
       setTimeout(checkHeartBeat, 5000);
     }
-  })
-  .controller('AppCtrl', function ($scope,$http, $timeout, $log) {
-    //
-    // Currently query is designed like this:
-    // type: should be always result (since we want judgement results)
-    // size: is the number of results that we want in the response
-    // input: is the users' search query
-    $http.get(generateSearchURI(5,$scope.searchTerm)).
-        success(function(data) {
-            function compare(a,b) {
-            if (a.similarity > b.similarity)
-              return -1;
-            else if (a.similarity < b.similarity)
-              return 1;
-            else
-              return 0;
-        }
-          data.sort(compare);
-          $scope.results = data;
-          console.log(data);
-        });
   })
   .controller('LeftCtrl', function ($scope, $timeout, $mdSidenav, $log) {
     $scope.close = function () {
@@ -136,4 +125,31 @@ angular
           $log.debug("close LEFT is done");
         });
     };
+  })
+  .service("restAPI", function($http){
+    var results = [];
+    this.getResults = function(){
+      return results;
+    }
+    this.updateResults = function(searchTerm){
+      // Currently query is designed like this:
+      // type: should be always result (since we want judgement results)
+      // size: is the number of results that we want in the response
+      // input: is the users' search query
+        console.log("Search this term: " + searchTerm);
+        $http.get(generateSearchURI(5,searchTerm)).
+            success(function(data) {
+                function compare(a,b) {
+                if (a.similarity > b.similarity)
+                  return -1;
+                else if (a.similarity < b.similarity)
+                  return 1;
+                else
+                  return 0;
+            }
+              //data.sort(compare);
+              console.log(data);
+              results = data;
+            });
+    }
   });
