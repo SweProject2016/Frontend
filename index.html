@@ -58,12 +58,16 @@
               <label>
                 Gib eine Rechtsfrage ein:
               </label>
-              <input type="text" ng-change="retrieveData()" ng-model="searchTerm">
+              <input type="text" ng-change="inputChanged()" ng-model="searchTerm">
             </md-input-container>
           </div>
         </form>
       </section>
       <section id="resultContainer" ng-controller="ResultCtrl" layout="column">
+        <div ng-if="queryInProgress" layout layout-align="center center">
+          <md-progress-circular md-diameter="72" md-mode="indeterminate"></md-progress-circular>
+        </div>
+        <div ng-if="!queryInProgress">
         <md-card md-whiteframe="12" ng-repeat="item in results | orderBy:'similarity':true">
           <md-card-title id="resultTitle">
             <md-card-title-text layout="row" flex>
@@ -104,6 +108,7 @@
             </div>
           </md-card-actions>
         </md-card>
+      </div>
       </section>
       <section layout-align="center center" layout="row" ng-controller="BottomCtrl">
         <div>
