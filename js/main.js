@@ -18,11 +18,6 @@ angular
   .controller('MainInputCtrl', function($scope, $log, restAPI, $http, $timeout, $mdDialog, $mdSidenav ){
     $scope.toggleLeft = buildDelayedToggler('left');
     $scope.infoClicked = displayInfoBox;
-    $scope.retrieveData = function(){
-      restAPI.updateResults($scope.searchTerm);
-    };
-
-
     /**
     * Supplies a function that will continue to operate until the
     * time is up.
@@ -93,12 +88,26 @@ angular
       );
     }
   })
-  .controller('ResultCtrl', function($scope, restAPI, $interval){
-    $scope.results = restAPI.getResults();
-    function testfunc(){
-      console.log("nice results", restAPI.getResults());
-    };
-    $interval(testfunc, 1000);
+  .controller('SearchControl', function($scope, restAPI){
+    $scope.retrieveData = function(){
+      restAPI.updateResults($scope.searchTerm);
+    }
+  })
+  .controller('ResultCtrl', function($scope, $mdDialog, $interval){
+    $scope.$on("newResultData", function (evt, newData) {
+      $scope.results = newData;
+    });
+    $scope.pdfClicked = function(fileLink) {
+      $mdDialog.show(
+      $mdDialog.alert()
+        .parent(angular.element(document.querySelector('#appContainer')))
+        .clickOutsideToClose(true)
+        .title('Opening PDF...')
+        .textContent('You clicked on the link to: ' + fileLink)
+        .ariaLabel('PDF Link')
+        .ok('Got it!')
+      );
+    }
   })
   .controller('BottomCtrl', function($scope, $http){
 
@@ -107,10 +116,14 @@ angular
     restAPI.updateResults("test");
     checkHeartBeat();
     function checkHeartBeat(){
-      $http.get(generateStatusURI()).then(function successCallback(data){
-        if(data.server == "running"){
+      console.log("Checking Server Status!");
+      $http.get(generateStatusURI()).then(function successCallback(response){
+        if(response.data.server == "running"){
           console.log("server is running");
           $scope.serverConnectionLost = false;
+        } else {
+          console.log("this should not happen");
+          $scope.serverConnectionLost = true;
         }
       }, function errorCallback(response) {
         $scope.serverConnectionLost = true;
@@ -126,7 +139,7 @@ angular
         });
     };
   })
-  .service("restAPI", function($http){
+  .service("restAPI", function($http, $rootScope){
     var results = [];
     this.getResults = function(){
       return results;
@@ -150,6 +163,7 @@ angular
               //data.sort(compare);
               console.log(data);
               results = data;
+              $rootScope.$broadcast("newResultData", data);
             });
     }
   });

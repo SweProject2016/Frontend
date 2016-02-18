@@ -3,43 +3,15 @@
 
 <head>
   <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <link rel="stylesheet" type="text/css" href="style.css">
   <link rel="stylesheet" href="/bower_components/angular-material/angular-material.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="/style.css" rel="stylesheet">
 </head>
 <script src="/bower_components/angular/angular.js"></script>
 <script src="/bower_components/angular-aria/angular-aria.js"></script>
 <script src="/bower_components/angular-animate/angular-animate.js"></script>
 <script src="/bower_components/angular-material/angular-material.js"></script>
 <script src="js/main.js"></script>
-<style>
-  #colorbar {
-    height: 150px;
-    background: #009688;
-    position: absolute;
-    top: 0;
-    width: 100%;
-  }
-  body {
-
-  }
-  #buttonRow {
-    height: 110px;
-  }
-  #bgContainer {
-    height: 100%;
-    width: 100%;
-    z-index: -2;
-    background: #FAFAFA;
-    position:absolute;
-  }
-  #inputFrame {
-    background: #FFFFFF;
-    z-index: 2;
-    position: relative;
-    height: 80px;
-  }
-</style>
 <body id="appContainer" ng-app="CBSFrontend">
   <div id="bgContainer"></div>
   <div ng-controller="AppCtrl" layout="column" style="height:500px;" ng-cloak>
@@ -62,15 +34,14 @@
     <section ng-if="serverConnectionLost" layout="row">
       <md-toolbar layout-align="center center" class="md-warn">
         <div>
-          Sorry, we are currently experiencing technical difficulties! :(
+          Sorry, wir haben offenbar momentan einige technische Probleme :(
         </div>
       </md-toolbar>
     </section>
     <div style="position:relative;">
-      <div id="colorbar"></div>
+      <div id="titlebar"></div>
       <!-- First Row, Currently contains the left menu button and the right info button-->
       <section id="buttonRow" layout="row" ng-Controller="MainInputCtrl" flex>
-
         <div layout-padding flex="100" layout layout-align="space-between">
         <md-button ng-click="toggleLeft()" class="md-icon-button" aria-label="Menu">
           <md-icon aria-label="Menu" class="material-icons">menu</md-icon>
@@ -80,33 +51,57 @@
         </md-button>
       </div>
       </section>
-      <section layout="row" layout-align="start start" flex>
+      <section id="searchRow" ng-Controller="SearchControl" layout="row" layout-align="start start" flex>
         <form ng-submit="retrieveData()" flex="100" flex layout layout-align="center start">
           <div md-whiteframe="24" id="inputFrame" layout layout-align="center start" flex="50">
             <md-input-container flex="90" id="mainInput">
               <label>
-                Gebe eine Rechtsfrage ein:
+                Gib eine Rechtsfrage ein:
               </label>
-              <input type="text" ng-enter="retrieveData()" ng-model="searchTerm">
+              <input type="text" ng-change="retrieveData()" ng-model="searchTerm">
             </md-input-container>
           </div>
         </form>
       </section>
-      <section ng-controller="ResultCtrl" layout="row">
-        <md-card ng-repeat="item in results | orderBy:'similarity':true">
-          <md-card-title>
-            <md-card-title-text>
-              <span class="md-headline">{{item.judgement.offence}} {{item.similarity | number:2 | number}}</span>
-              <span class="md-subhead">{{item.judgmenet.comittee.name}}</span>
+      <section id="resultContainer" ng-controller="ResultCtrl" layout="column">
+        <md-card md-whiteframe="12" ng-repeat="item in results | orderBy:'similarity':true">
+          <md-card-title id="resultTitle">
+            <md-card-title-text layout="row" flex>
+              <span flex="90" class="md-headline">{{item.judgement.offence}}</span>
+              <div id="resultDateAndComittee" flex="10" class="md-subhead">
+                {{item.judgement.date | date:'EEE, dd.MM.yyyy'}} <br>
+                {{item.judgement.comittee.name}}
+              </div>
             </md-card-title-text>
           </md-card-title>
+          <md-progress-linear md-mode="determinate" value="{{item.similarity * 100}}"></md-progress-linear>
           <md-card-content>
             Search Input: {{item.userInput}} <br>
             {{item.judgement.keywords}}
           </md-card-content>
-          <md-card-actions layout="row" layout-align="end center">
-            <md-button>Passend</md-button>
-            <md-button>Unpassend</md-button>
+          <md-card-actions layout="row" layout-align="space-between">
+            <div>
+              <md-button ng-click="pdfClicked(item.judgement.pdfLink)" class="md-icon-button" aria-label="Info">
+                <md-icon aria-label="picture_as_pdf" class="material-icons">picture_as_pdf</md-icon>
+              </md-button>
+              <md-tooltip md-direction="top">
+                Öffne das PDF-Dokument zum passenden Fall
+              </md-tooltip>
+            </div>
+            <div>
+              <md-button class="resultButtons md-primary md-raised md-hue-4">
+                Passend
+                <md-tooltip md-direction="top">
+                  Findest du, dass dieses Ergebnis deiner Frage ähnelt?
+                </md-tooltip>
+              </md-button>
+              <md-button class="resultButtons md-warn md-raised md-hue-4">
+                Unpassend
+                <md-tooltip md-direction="top">
+                  Hat dieses Ergebnis nichts mit deiner Frage zu tun?
+                </md-tooltip>
+              </md-button>
+            </div>
           </md-card-actions>
         </md-card>
       </section>
@@ -115,16 +110,16 @@
         <md-button ng-click="toggleInfo()" class="md-icon-button" aria-label="Heartbeat">
             <md-icon ng-if="!serverConnectionLost" style="color:#2ECC71;font:bold;"  aria-label="favorite" class="material-icons">
               favorite
-              <md-tooltip md-direction="top">
-                Server Responded!
-              </md-tooltip>
             </md-icon>
+            <md-tooltip ng-if="!serverConnectionLost" md-direction="top">
+              Server Responded!
+            </md-tooltip>
           <md-icon ng-if="serverConnectionLost" style="color:#D35400;font:bold;"  aria-label="favorite" class="material-icons">
             favorite
-            <md-tooltip md-direction="top">
-              Server not responding!
-            </md-tooltip>
           </md-icon>
+          <md-tooltip ng-if="serverConnectionLost" md-direction="top">
+            Server not responding!
+          </md-tooltip>
         </md-button>
       </div>
       </section>

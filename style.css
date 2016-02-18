@@ -1,3 +1,44 @@
-#mainInput {
-  width: 50%;
+#titlebar {
+  height: 150px;
+  background: #009688;
+  position: absolute;
+  top: 0;
+  width: 100%;
+  background-image: url("assets/hwrbeargrey.png");
+  background-position: 50% 10%;
+  background-repeat: no-repeat;
+}
+body {
+
+}
+#buttonRow {
+  height: 110px;
+}
+#bgContainer {
+  height: 100%;
+  width: 100%;
+  z-index: -2;
+  background: #FAFAFA;
+  position:absolute;
+}
+#inputFrame {
+  background: #FFFFFF;
+  z-index: 2;
+  position: relative;
+  height: 80px;
+}
+#searchRow {
+  margin-bottom: 50px;
+}
+#resultContainer {
+  margin: 50px 50px 50px 50px;
+}
+#resultTitle {
+  padding: 16px;
+}
+#resultDateAndComittee {
+  padding: 0px;
+}
+.resultButtons {
+  font-weight: bold;
 }
