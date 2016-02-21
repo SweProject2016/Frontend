@@ -49,6 +49,9 @@
         <md-button ng-click="infoClicked()" class="md-icon-button" aria-label="Info">
           <md-icon aria-label="Info" class="material-icons">info</md-icon>
         </md-button>
+          <md-tooltip md-direction="right">
+            Hilfe
+          </md-tooltip>
       </div>
       </section>
       <section id="searchRow" ng-Controller="SearchControl" layout="row" layout-align="start start" flex>
@@ -68,9 +71,19 @@
           <md-card-title id="resultTitle">
             <md-card-title-text layout="row" flex>
               <span flex="90" class="md-headline">{{item.judgement.offence}}</span>
+              <md-tooltip md-direction="left">
+                Art des Straftats
+              </md-tooltip>
               <div id="resultDateAndComittee" flex="10" class="md-subhead">
-                {{item.judgement.date | date:'EEE, dd.MM.yyyy'}} <br>
+                {{item.judgement.date | date:'EEE, dd.MM.yyyy'}}
+                <md-tooltip md-direction="top">
+                  Datum des Urteils
+                </md-tooltip>
+                <br>
                 {{item.judgement.comittee.name}}
+                <md-tooltip md-direction="bottom">
+                  Name des Falles
+                </md-tooltip>
               </div>
             </md-card-title-text>
           </md-card-title>
@@ -95,7 +108,7 @@
                   Findest du, dass dieses Ergebnis deiner Frage ähnelt?
                 </md-tooltip>
               </md-button>
-              <md-button class="resultButtons md-warn md-raised md-hue-4">
+              <md-button ng-click="remove(item)" class="resultButtons md-warn md-raised md-hue-4">
                 Unpassend
                 <md-tooltip md-direction="top">
                   Hat dieses Ergebnis nichts mit deiner Frage zu tun?

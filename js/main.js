@@ -108,6 +108,18 @@ angular
         .ok('Got it!')
       );
     }
+
+
+    //have to be corrected
+    /*   $scope.remove = function (item) {
+      var delItem = $scope.judgement[item];
+      API.DeleteItem({ id: delItem.id }, function (success) {
+        $scope.judgement.splice(item, 1);
+      });
+    };*/
+
+
+
   })
   .controller('BottomCtrl', function($scope, $http){
 
