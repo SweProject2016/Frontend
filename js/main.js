@@ -1,6 +1,13 @@
+//Constants for REST-API URIs
 REST_API_PROTOCOL = "http://"
 REST_API_DOMAIN = "localhost:8080";
 REST_API_BASEPATH = "/swe/api/";
+
+//Constants for the structure of the search results
+RESULT_STRUCUTURE = ["userInput", "similarity", "judgement"];
+JUDGEMENT_STRUCUTRE = ["fileReference", "sentence", "offence", "pdfLink",
+  "pdfFileName", "keywords", "comittee", "sector", "date", "pageRank",
+  "timestamp", "keywordsAsList"];
 
 function generateSearchURI(numberOfResults, searchTerm){
   var httpRequest = REST_API_PROTOCOL + REST_API_DOMAIN + REST_API_BASEPATH;
@@ -160,6 +167,9 @@ angular
   })
   .service("restAPI", function($http, $rootScope){
     var results = [];
+    setResults = function(data){
+      $rootScope.$broadcast("newResultData", data);
+    }
     this.getResults = function(){
       return results;
     }
@@ -169,14 +179,15 @@ angular
       // size: is the number of results that we want in the response
       // input: is the users' search query
       searchTerm = searchTerm.trim();
-      if(searchTerm == ""){
+      if(searchTerm === ""){
         console.log("Requested term is empty!");
         $rootScope.$broadcast("queryStatus", false);
         return;
       }
       console.log("Search this term: " + searchTerm);
+      $rootScope.$broadcast("queryStatus", true);
       $http.get(generateSearchURI(5,searchTerm)).
-          success(function(data) {
+          success(function(response) {
             function compare(a,b) {
             if (a.similarity > b.similarity)
               return -1;
@@ -186,10 +197,78 @@ angular
               return 0;
             }
             //data.sort(compare);
-            console.log(data);
-            results = data;
-            $rootScope.$broadcast("newResultData", data);
+
+            //resultContainer:
+            // judgement: data
+            // collapsed: bool
+            // similarity: float
+
+            if(!assertIsArray(response)){
+              console.log("Result response is not an array!");
+              $rootScope.$broadcast("queryStatus", false);
+              return;
+            }
+            if(!assertArrayNotEmpty(response)){
+              console.log("Result array is empty")
+              $rootScope.$broadcast("queryStatus", false);
+              return;
+            }
+            for(var responseItem of response){
+                if(!assertResultHasProperStructure(responseItem)){
+                  console.log("One or more Elements do not have the required structure");
+                  $rootScope.$broadcast("queryStatus", false);
+                  return;
+                }
+            }
+
+            console.log(response);
+            setResults(response);
             $rootScope.$broadcast("queryStatus", false);
           });
-    }
+    };
   });
+
+/*
+  Returns true if the specified variable is an array
+*/
+function assertIsArray(varToCheck) {
+  //You cannot just return Array.isAray(obj) since it could be
+  if(!varToCheck){
+    return false;
+  }
+  if(Array.isArray(varToCheck)){
+    return true;
+  }
+  return false;
+}
+
+/*
+  Checks whether the inserted array is empty
+*/
+function assertArrayNotEmpty(arrayToCheck){
+  if(arrayToCheck.length > 0){
+    return true;
+  }
+  return false;
+}
+
+/*
+  Performs a very simple, one layer deep check of the result structure as specified
+  in the constants.
+*/
+function assertResultHasProperStructure(responseItem){
+  if(responseItem === undefined){
+    return false;
+  }
+  for(var topLevelProperty of RESULT_STRUCUTURE){
+    if(responseItem[topLevelProperty] === undefined){
+      return false;
+    }
+  }
+  for(var judgementProperty of JUDGEMENT_STRUCUTRE){
+    if(responseItem['judgement'][judgementProperty] === undefined){
+      return false;
+    }
+  }
+  return true;
+}
