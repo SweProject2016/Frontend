@@ -108,9 +108,12 @@
           </md-card-actions>
         </md-card>
       </section>
-      <section layout-align="center center" layout="row" ng-controller="BottomCtrl">
+      <section layout-align="space-between" layout-padding layout="row" ng-controller="BottomCtrl">
         <div>
-        <md-button ng-click="toggleInfo()" class="md-icon-button" aria-label="Heartbeat">
+          © 2016 / <a href="./legalinfo.html">Impressum</a>
+        </div>
+        <div>
+          <md-button ng-click="toggleInfo()" class="md-icon-button" aria-label="Heartbeat">
             <md-icon ng-if="!serverConnectionLost" style="color:#2ECC71;font:bold;"  aria-label="favorite" class="material-icons">
               favorite
             </md-icon>
@@ -125,8 +128,19 @@
           </md-tooltip>
         </md-button>
       </div>
-      </section>
+      <div>
+        <md-button ng-href="https://www.facebook.com/pages/Hochschule-f%C3%BCr-Wirtschaft-und-Recht-Berlin/109005462450917?rf=109390362420446" class="md-icon-button" aria-label="Info">
+          <md-icon md-svg-src="./assets/facebook_icon.svg" class="icon-s24" aria-label="Facebook"></md-icon>
+        </md-button>
+        <md-button ng-href="http://www.hwr-berlin.de" class="md-icon-button" aria-label="Info">
+          <md-icon aria-label="home" class="material-icons">home</md-icon>
+        </md-button>
+        <md-button ng-href="mailto:askhwrio@gmail.com" class="md-icon-button" aria-label="Info">
+          <md-icon aria-label="email" class="material-icons">email</md-icon>
+        </md-button>
+      </div>
+    </section>
   </div>
-    </div>
+</div>
 </body>
 </html>
