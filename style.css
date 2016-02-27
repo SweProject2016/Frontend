@@ -42,3 +42,68 @@ body {
 .resultButtons {
   font-weight: bold;
 }
+
+.results.ng-enter-stagger {
+  -webkit-transition-delay: 0.2s;
+  transition-delay: 0.2s;
+}
+
+.results.ng-enter {
+  transition: 0.25s linear all;
+  transform: rotate(50deg);
+  opacity: 0;
+}
+.results.ng-enter-active {
+  transform: rotate(0deg);
+  opacity: 1;
+}
+
+.results.ng-leave-stagger {
+}
+
+.results.ng-leave {
+  transition: 0.25s linear all;
+}
+.results.ng-leave-active {
+    opacity: 0;
+}
+
+/* ngIf animation */
+.warningToolbar.ng-enter,
+.warningToolbar.ng-leave {
+  -webkit-transition: ease-in-out 1s;
+  -moz-transition: ease-in-out 1s;
+  -ms-transition: ease-in-out 1s;
+  -o-transition: ease-in-out 1s;
+  transition: ease-in-out 1s;
+}
+.warningToolbar.ng-enter,
+.warningToolbar.ng-leave.ng-leave-active {
+  opacity: 0;
+  transform: translateY(-100%);
+}
+.warningToolbar.ng-leave,
+.warningToolbar.ng-enter.ng-enter-active {
+  opacity: 1;
+  transform: translateY(0%);
+}
+
+/* ngIf animation */
+.querySpinner.ng-enter,
+.querySpinner.ng-leave {
+  -webkit-transition: ease-in-out 1s;
+  -moz-transition: ease-in-out 1s;
+  -ms-transition: ease-in-out 1s;
+  -o-transition: ease-in-out 1s;
+  transition: ease-in-out 1s;
+}
+.querySpinner.ng-enter,
+.querySpinner.ng-leave.ng-leave-active {
+  opacity: 0;
+  transform: scale(0);
+}
+.querySpinner.ng-leave,
+.querySpinner.ng-enter.ng-enter-active {
+  opacity: 1;
+  transform: scale(1);
+}

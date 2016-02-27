@@ -1,6 +1,5 @@
 //Constants for REST-API URIs
-REST_API_PROTOCOL = "http://"
-REST_API_DOMAIN = "localhost:8080";
+REST_API_DOMAIN = "http://localhost:8080";
 REST_API_BASEPATH = "/swe/api/";
 
 //Constants for the structure of the search results
@@ -10,7 +9,7 @@ JUDGEMENT_STRUCUTRE = ["fileReference", "sentence", "offence", "pdfLink",
   "timestamp", "keywordsAsList"];
 
 function generateSearchURI(numberOfResults, searchTerm){
-  var httpRequest = REST_API_PROTOCOL + REST_API_DOMAIN + REST_API_BASEPATH;
+  var httpRequest = REST_API_DOMAIN + REST_API_BASEPATH;
   httpRequest += "sample/get?type=result"; //Set type of response
   httpRequest += "&size=" + numberOfResults; //Set the number of results
   httpRequest += "&input=" + searchTerm; //Set the searchterm
@@ -18,11 +17,21 @@ function generateSearchURI(numberOfResults, searchTerm){
 }
 
 function generateStatusURI(){
-  return REST_API_PROTOCOL + REST_API_DOMAIN + REST_API_BASEPATH + "status/server";
+  return REST_API_DOMAIN + REST_API_BASEPATH + "status/server";
+}
+
+function generateVoteURI(caseID, value){
+  var httpRequest = REST_API_PROTOCOL + REST_API_BASEPATH + "/sample/vote?";
+  httpRequest += "caseid=" + caseID;
+  httpRequest += "&value=" + value;
+  return httpRequest;
 }
 
 angular
   .module('CBSFrontend', ['ngMaterial'])
+  .run(function($http) {
+    //LOAD COOKIES INTO JS VARS
+  })
   .controller('SideNavCtrl', function($scope){
 
   })
@@ -146,15 +155,16 @@ angular
           console.log("server is running");
           $scope.serverConnectionLost = false;
         } else {
-          console.log("this should not happen");
+          console.log("Either one of the servers is down or they replied something unrecognized");
+          console.log(response.data);
           $scope.serverConnectionLost = true;
-          $rootScope.$broadcast("queryStatus", false);
+          $rootScope.$broadcast("queryStatus", false)
         }
       }, function errorCallback(response) {
         $scope.serverConnectionLost = true;
         $rootScope.$broadcast("queryStatus", false);
       });
-      setTimeout(checkHeartBeat, 5000);
+      $timeout(checkHeartBeat, 5000);
     }
   })
   .controller('LeftCtrl', function ($scope, $timeout, $mdSidenav, $log) {
@@ -165,10 +175,18 @@ angular
         });
     };
   })
-  .service("restAPI", function($http, $rootScope){
+  .service("restAPI", function($http, $timeout, $rootScope){
     var results = [];
     setResults = function(data){
-      $rootScope.$broadcast("newResultData", data);
+      if(data == undefined){
+        data = [];
+      }
+      $rootScope.$broadcast("queryStatus", false);
+      $rootScope.$broadcast("newResultData", []);
+      $timeout(function(){
+        $rootScope.$broadcast("newResultData", data);
+      }, 750);
+
     }
     this.getResults = function(){
       return results;
@@ -181,13 +199,18 @@ angular
       searchTerm = searchTerm.trim();
       if(searchTerm === ""){
         console.log("Requested term is empty!");
-        $rootScope.$broadcast("queryStatus", false);
+        setResults();
         return;
       }
       console.log("Search this term: " + searchTerm);
       $rootScope.$broadcast("queryStatus", true);
-      $http.get(generateSearchURI(5,searchTerm)).
-          success(function(response) {
+      var request = {
+        method: 'GET',
+        url: generateSearchURI(5,searchTerm),
+        headers: {
+        }
+      };
+      $http(request).then(function (response) {
             function compare(a,b) {
             if (a.similarity > b.similarity)
               return -1;
@@ -198,32 +221,39 @@ angular
             }
             //data.sort(compare);
 
-            //resultContainer:
-            // judgement: data
-            // collapsed: bool
-            // similarity: float
-
+            response = response.data;
             if(!assertIsArray(response)){
               console.log("Result response is not an array!");
-              $rootScope.$broadcast("queryStatus", false);
+              setResults();
               return;
             }
             if(!assertArrayNotEmpty(response)){
               console.log("Result array is empty")
-              $rootScope.$broadcast("queryStatus", false);
+              setResults();
               return;
             }
+
+            //Check each element for proper structure and add every fitting one to the processedResponse
+            //ResultContainer structure:
+            // judgement: data
+            // collapsed: bool
+            // similarity: float
+            // userInput: string
+            var processedResponse = [];
             for(var responseItem of response){
                 if(!assertResultHasProperStructure(responseItem)){
-                  console.log("One or more Elements do not have the required structure");
-                  $rootScope.$broadcast("queryStatus", false);
-                  return;
+                  console.log("The following item doesn't have the proper structure", responseItem);
+                } else {
+                  var tempElement = {};
+                  tempElement.judgement = responseItem.judgement;
+                  tempElement.collapsed = false;
+                  tempElement.similarity = responseItem.similarity;
+                  tempElement.userInput = responseItem.userInput
+                  processedResponse.push(tempElement);
                 }
             }
-
-            console.log(response);
-            setResults(response);
-            $rootScope.$broadcast("queryStatus", false);
+            console.log(processedResponse);
+            setResults(processedResponse);
           });
     };
   });

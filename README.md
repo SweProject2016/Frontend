@@ -29,6 +29,10 @@ to update the dependencies. Then simply use the Webserver of your choice to deli
 TODO
 ----
 
-- Cleanup HTML and main.js and suitable design patterns for Angular Controllers
-- Implemented pretty much the whole functionality
-- Revise the flexboxes and layout containers to be more clear.
+- Collapse result on button clicked
+- Implement Settings option in the sidenav
+- Implement Login functionality (could be just basic api and access token setting)
+- Implement back-POST for the rate result functionality
+- Footer with links to HWR Facebook, Homepage and copyright etc.
+- Update Result box with all the given information
+- Change all console.logs to something more appropriate, where the log level can be set

@@ -31,7 +31,7 @@
 
 
     <!-- WARNING TOOLBAR -->
-    <section ng-if="serverConnectionLost" layout="row">
+    <section class="warningToolbar" ng-if="serverConnectionLost" layout="row">
       <md-toolbar layout-align="center center" class="md-warn">
         <div>
           Sorry, wir haben offenbar momentan einige technische Probleme :(
@@ -64,11 +64,10 @@
         </form>
       </section>
       <section id="resultContainer" ng-controller="ResultCtrl" layout="column">
-        <div ng-if="queryInProgress" layout layout-align="center center">
+        <div class="querySpinner" ng-if="queryInProgress" layout layout-align="center center">
           <md-progress-circular md-diameter="72" md-mode="indeterminate"></md-progress-circular>
         </div>
-        <div ng-if="!queryInProgress">
-        <md-card md-whiteframe="12" ng-repeat="item in results | orderBy:'similarity':true">
+        <md-card md-whiteframe="12" class="results" ng-repeat="item in results | orderBy:'similarity':true">
           <md-card-title id="resultTitle">
             <md-card-title-text layout="row" flex>
               <span flex="90" class="md-headline">{{item.judgement.offence}}</span>
@@ -108,7 +107,6 @@
             </div>
           </md-card-actions>
         </md-card>
-      </div>
       </section>
       <section layout-align="center center" layout="row" ng-controller="BottomCtrl">
         <div>
