@@ -23,12 +23,25 @@
           <h1 class="md-toolbar-tools">Hallo, Anonym</h1>
         </md-toolbar>
         <md-content layout="column" layout-padding ng-controller="LeftCtrl">
+          <md-button class="md-primary  md-hue-1">Anmelden</md-button>
           <md-button class="md-raised">Fallsuche</md-button>
-          <md-button class="md-raised md-warn">Settings</md-button>
+          <!--<md-button class="md-raised md-warn">Settings</md-button>-->
+          <ul class="Settings">
+              <label for="drop-1" class="toggle">Settings </label>
+              <ul>
+                <li><a href="#">Allgemein</a></li>
+                <ul>
+                  <li><a href="#">Name</a></li>
+                  <li><a href="#">E-Mail-Adresse</a></li>
+                  <li><a href="#">Passwort</a></li>
+                </ul>
+                <li><a href="#">Sicherheit</a></li>
+                <li><a href="#">Sprache</a></li>
+              </ul>
+            </ul>
         </md-content>
       </div>
     </md-sidenav>
-
 
     <!-- WARNING TOOLBAR -->
     <section class="warningToolbar" ng-if="serverConnectionLost" layout="row">
@@ -78,7 +91,7 @@
             </md-card-title-text>
           </md-card-title>
           <md-progress-linear md-mode="determinate" value="{{item.similarity * 100}}"></md-progress-linear>
-          <md-card-content>
+          <md-card-content >
             Search Input: {{item.userInput}} <br>
             {{item.judgement.keywords}}
           </md-card-content>
@@ -104,7 +117,7 @@
                   Hat dieses Ergebnis nichts mit deiner Frage zu tun?
                 </md-tooltip>
               </md-button>
-            </div>
+            </div>a
           </md-card-actions>
         </md-card>
       </section>
