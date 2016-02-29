@@ -17,7 +17,7 @@ function generateSearchURI(numberOfResults, searchTerm){
 }
 
 function generateStatusURI(){
-  return REST_API_DOMAIN + REST_API_BASEPATH + "status/server";
+  return REST_API_DOMAIN + REST_API_BASEPATH + "status";
 }
 
 function generateVoteURI(caseID, value){
@@ -151,7 +151,8 @@ angular
     function checkHeartBeat(){
       console.log("Checking Server Status!");
       $http.get(generateStatusURI()).then(function successCallback(response){
-        if(response.data.server == "running"){
+        response = response.data.entity;
+        if(response.server == "RUNNING" && response.databaseStatus == "RUNNING"){
           console.log("server is running");
           $scope.serverConnectionLost = false;
         } else {
@@ -208,6 +209,8 @@ angular
         method: 'GET',
         url: generateSearchURI(5,searchTerm),
         headers: {
+          //'X-Api-Key': "$A$9af4d8381781baccb0f915e554f8798d",
+          //'X-Access-Token': "$T$de61425667e2e4ac0884808b769cd042",
         }
       };
       $http(request).then(function (response) {
@@ -221,7 +224,7 @@ angular
             }
             //data.sort(compare);
 
-            response = response.data;
+            response = response.data.entity;
             if(!assertIsArray(response)){
               console.log("Result response is not an array!");
               setResults();
