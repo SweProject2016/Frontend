@@ -25,12 +25,10 @@
         </md-toolbar>
         <md-content layout="column" layout-padding ng-controller="LeftCtrl">
           <md-input-container>
-            <label>Username</label>
-            <input type="text" name="user" ng-change="inputChanged()" ng-model="user" required>
+            <input type="text" name="user" placeholder="Benutzername" ng-model="user" required>
           </md-input-container>
           <md-input-container>
-            <label>Passwort</label>
-            <input type="password" name="pwd" ng-change="inputChanged()" ng-model="password" required>
+            <input type="password" name="pwd" placeholder="Passwort" ng-model="password" required>
           </md-input-container>
           <!--<md-button class="md-primary  md-hue-1">Anmelden</md-button>-->
           <md-button class="md-raised">Fallsuche</md-button>
