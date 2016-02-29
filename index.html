@@ -23,16 +23,15 @@
         <md-toolbar class="md-theme-indigo">
           <h1 class="md-toolbar-tools">Hallo, Anonym</h1>
         </md-toolbar>
-          <p>Username:<br>
-          <input type="text" name="user" ng-model="user" required>
-          </p>
-          <p>Password:<br>
-          <input type="password" name="pwd" ng-model="password" required>
-          </p>
-          <p>
-          <input type="submit" >
-          </p>
         <md-content layout="column" layout-padding ng-controller="LeftCtrl">
+          <md-input-container>
+            <label>Username</label>
+            <input type="text" name="user" ng-change="inputChanged()" ng-model="user" required>
+          </md-input-container>
+          <md-input-container>
+            <label>Passwort</label>
+            <input type="password" name="pwd" ng-change="inputChanged()" ng-model="password" required>
+          </md-input-container>
           <!--<md-button class="md-primary  md-hue-1">Anmelden</md-button>-->
           <md-button class="md-raised">Fallsuche</md-button>
           <md-button class="md-raised md-warn">Settings</md-button>
