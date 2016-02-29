@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="./bower_components/angular-material/angular-material.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
 <script src="./bower_components/angular/angular.js"></script>
 <script src="./bower_components/angular-aria/angular-aria.js"></script>
 <script src="./bower_components/angular-animate/angular-animate.js"></script>
@@ -22,23 +23,19 @@
         <md-toolbar class="md-theme-indigo">
           <h1 class="md-toolbar-tools">Hallo, Anonym</h1>
         </md-toolbar>
+          <p>Username:<br>
+          <input type="text" name="user" ng-model="user" required>
+          </p>
+          <p>Password:<br>
+          <input type="password" name="pwd" ng-model="password" required>
+          </p>
+          <p>
+          <input type="submit" >
+          </p>
         <md-content layout="column" layout-padding ng-controller="LeftCtrl">
-          <md-button class="md-primary  md-hue-1">Anmelden</md-button>
+          <!--<md-button class="md-primary  md-hue-1">Anmelden</md-button>-->
           <md-button class="md-raised">Fallsuche</md-button>
-          <!--<md-button class="md-raised md-warn">Settings</md-button>-->
-          <ul class="Settings">
-              <label for="drop-1" class="toggle">Settings </label>
-              <ul>
-                <li><a href="#">Allgemein</a></li>
-                <ul>
-                  <li><a href="#">Name</a></li>
-                  <li><a href="#">E-Mail-Adresse</a></li>
-                  <li><a href="#">Passwort</a></li>
-                </ul>
-                <li><a href="#">Sicherheit</a></li>
-                <li><a href="#">Sprache</a></li>
-              </ul>
-            </ul>
+          <md-button class="md-raised md-warn">Settings</md-button>
         </md-content>
       </div>
     </md-sidenav>
