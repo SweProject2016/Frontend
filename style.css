@@ -64,11 +64,10 @@ body {
 
 .results.ng-enter {
   transition: 0.25s linear all;
-  transform: rotate(50deg);
   opacity: 0;
 }
 .results.ng-enter-active {
-  transform: rotate(0deg);
+  height: auto;
   opacity: 1;
 }
 
