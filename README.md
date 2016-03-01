@@ -33,6 +33,5 @@ TODO
 - Implement Settings option in the sidenav
 - Implement Login functionality (could be just basic api and access token setting)
 - Implement back-POST for the rate result functionality
-- Footer with links to HWR Facebook, Homepage and copyright etc.
 - Update Result box with all the given information
 - Change all console.logs to something more appropriate, where the log level can be set

@@ -209,8 +209,8 @@ angular
         method: 'GET',
         url: generateSearchURI(5,searchTerm),
         headers: {
-          //'X-Api-Key': "$A$9af4d8381781baccb0f915e554f8798d",
-          //'X-Access-Token': "$T$de61425667e2e4ac0884808b769cd042",
+          'X-Api-Key': "$A$9af4d8381781baccb0f915e554f8798d",
+          'X-Access-Token': "$T$de61425667e2e4ac0884808b769cd042",
         }
       };
       $http(request).then(function (response) {
