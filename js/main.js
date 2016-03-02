@@ -1,11 +1,12 @@
 //Constants for REST-API URIs
-REST_API_DOMAIN = "http://localhost:8271";
+REST_API_DOMAIN = "http://it14.tech:8271";
 REST_API_BASEPATH = "/swe/api/";
 
 //
 REST_API_REQUESTSIZE = 5;
 REST_API_STATUS_RUNNING = "RUNNING";
 SEARCH_INPUT_TIMEOUT = 1500;
+SCROLL_UPDATE_HEIGHT = 200; //Distance from the bottom of the page to trigger the loading of more results
 //Constants for the structure of the search results
 RESULT_STRUCUTURE = ["userInput", "similarity", "judgement"];
 JUDGEMENT_STRUCUTRE = ["fileReference", "sentence", "offence", "pdfLink",
@@ -114,13 +115,16 @@ angular
     }
   })
   .controller('SearchControl', function($scope, $timeout, $rootScope, $document, $window, restAPI){
-    var inputUpdateTimeout;
+    var inputUpdateTimeout; //Timeout for the auto-send
+    var scrollLock = false; //This is set to true, when there is already a scroll-update on the way. Avoids several updates at the same time
     function callUpdateService(){
       $rootScope.$broadcast("queryStatus", true);
       restAPI.getResults($scope.searchTerm).then(function(resultData){
+        restAPI.setCurrentResults();
         restAPI.notifyResults();
         $timeout(750).then(function(){
           restAPI.notifyResults(resultData);
+          restAPI.setCurrentResults(resultData);
         })
       });
     }
@@ -132,6 +136,31 @@ angular
       inputUpdateTimeout = setTimeout(callUpdateService, SEARCH_INPUT_TIMEOUT);
       $rootScope.$broadcast("queryStatus", true);
     };
+    $document.on('scroll', function() {
+      //getDocHeight copied from http://james.padolsey.com/javascript/get-document-height-cross-browser/
+      function getDocHeight(documentElement) {
+        return Math.max(
+            documentElement.body.scrollHeight, documentElement.documentElement.scrollHeight,
+            documentElement.body.offsetHeight, documentElement.documentElement.offsetHeight,
+            documentElement.body.clientHeight, documentElement.documentElement.clientHeight
+        );
+      }
+      if(!scrollLock && $document[0].scrollingElement.scrollTop +$window.innerHeight >= getDocHeight($document[0]) - SCROLL_UPDATE_HEIGHT){
+        if(restAPI.getCurrentResults().length > 0){
+          scrollLock = true;
+          //You could use $scope.searchTerm to get the seachterm, but the user could have altered it or removed it entirely
+          //so its safer to hijack the first result item and get the searchterm from there
+          restAPI.getResults(restAPI.getCurrentResults()[0].userInput, restAPI.getCurrentResults().length).then(function(resultData){
+            restAPI.addToCurrentResults(resultData);
+            restAPI.notifyResults(restAPI.getCurrentResults());
+            scrollLock = false;
+          }, function(){
+            //Disable scrollLock regardless of getResults success
+            scrollLock = false
+          });
+      };
+    }
+  });
   })
   .controller('ResultCtrl', function($scope, $mdDialog, $interval){
     $scope.$on("newResultData", function (evt, newData) {
@@ -156,10 +185,13 @@ angular
 
   })
   .controller('AppCtrl', function ($scope, $rootScope, restAPI, $http, $timeout, $log) {
+    /*
+    $scope.searchTerm = "test";
     restAPI.getResults("test").then(function(resultData){
+      restAPI.setCurrentResults(resultData);
       restAPI.notifyResults(resultData);
     });
-
+    */
     checkHeartBeat();
     function checkHeartBeat(){
       console.log("Checking Server Status!");
@@ -191,12 +223,14 @@ angular
         searchTerm = searchTerm.trim();
         if(searchTerm === ""){
           console.log("Requested term is empty!");
+          $rootScope.$broadcast("queryStatus", false);
           reject();
           return;
         }
         if(startIndex === undefined){
           startIndex = 0;
         }
+        startIndex += REST_API_REQUESTSIZE;
         console.log("Search this term: " + searchTerm);
         $rootScope.$broadcast("queryStatus", true);
         var request = {
@@ -221,6 +255,7 @@ angular
           response = response.data.entity;
           if(!assertCompilation(response)){
             console.log("Result response is not an array!");
+            $rootScope.$broadcast("queryStatus", false);
             reject();
             return;
           }
@@ -264,10 +299,16 @@ angular
       $rootScope.$broadcast("queryStatus", false);
     }
     this.setCurrentResults = function(newResults) {
+      if(newResults === undefined){
+        newResults = [];
+      }
       currentResults = newResults;
     }
     this.getCurrentResults = function(){
       return currentResults;
+    }
+    this.addToCurrentResults = function(newResults){
+      currentResults = currentResults.concat(newResults);
     }
   });
 
