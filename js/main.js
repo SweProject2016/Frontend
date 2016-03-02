@@ -1,18 +1,23 @@
 //Constants for REST-API URIs
-REST_API_DOMAIN = "http://localhost:8080";
+REST_API_DOMAIN = "http://localhost:8271";
 REST_API_BASEPATH = "/swe/api/";
 
+//
+REST_API_REQUESTSIZE = 5;
+REST_API_STATUS_RUNNING = "RUNNING";
+SEARCH_INPUT_TIMEOUT = 1500;
 //Constants for the structure of the search results
 RESULT_STRUCUTURE = ["userInput", "similarity", "judgement"];
 JUDGEMENT_STRUCUTRE = ["fileReference", "sentence", "offence", "pdfLink",
   "pdfFileName", "keywords", "comittee", "sector", "date", "pageRank",
   "timestamp", "keywordsAsList"];
 
-function generateSearchURI(numberOfResults, searchTerm){
+function generateSearchURI(numberOfResults, searchTerm, startIndex){
   var httpRequest = REST_API_DOMAIN + REST_API_BASEPATH;
   httpRequest += "sample/get?type=result"; //Set type of response
   httpRequest += "&size=" + numberOfResults; //Set the number of results
   httpRequest += "&input=" + searchTerm; //Set the searchterm
+  httpRequest += "&start=" + startIndex;
   return httpRequest;
 }
 
@@ -108,18 +113,23 @@ angular
       );
     }
   })
-  .controller('SearchControl', function($scope, $rootScope, restAPI){
+  .controller('SearchControl', function($scope, $timeout, $rootScope, $document, $window, restAPI){
     var inputUpdateTimeout;
     function callUpdateService(){
       $rootScope.$broadcast("queryStatus", true);
-      restAPI.updateResults($scope.searchTerm);
+      restAPI.getResults($scope.searchTerm).then(function(resultData){
+        restAPI.notifyResults();
+        $timeout(750).then(function(){
+          restAPI.notifyResults(resultData);
+        })
+      });
     }
     $scope.retrieveData = callUpdateService;
     $scope.inputChanged = function(){
       if(inputUpdateTimeout){
         clearTimeout(inputUpdateTimeout);
       }
-      inputUpdateTimeout = setTimeout(callUpdateService, 1500);
+      inputUpdateTimeout = setTimeout(callUpdateService, SEARCH_INPUT_TIMEOUT);
       $rootScope.$broadcast("queryStatus", true);
     };
   })
@@ -145,14 +155,17 @@ angular
   .controller('BottomCtrl', function($scope, $http){
 
   })
-  .controller('AppCtrl', function ($scope, $rootScope ,restAPI, $http, $timeout, $log) {
-    restAPI.updateResults("test");
+  .controller('AppCtrl', function ($scope, $rootScope, restAPI, $http, $timeout, $log) {
+    restAPI.getResults("test").then(function(resultData){
+      restAPI.notifyResults(resultData);
+    });
+
     checkHeartBeat();
     function checkHeartBeat(){
       console.log("Checking Server Status!");
       $http.get(generateStatusURI()).then(function successCallback(response){
         response = response.data.entity;
-        if(response.server == "RUNNING" && response.databaseStatus == "RUNNING"){
+        if(response.server == REST_API_STATUS_RUNNING && response.databaseStatus ==  REST_API_STATUS_RUNNING){
           console.log("server is running");
           $scope.serverConnectionLost = false;
         } else {
@@ -168,97 +181,94 @@ angular
       $timeout(checkHeartBeat, 5000);
     }
   })
-  .controller('LeftCtrl', function ($scope, $timeout, $mdSidenav, $log) {
-    $scope.close = function () {
-      $mdSidenav('left').close()
-        .then(function () {
-          $log.debug("close LEFT is done");
-        });
-    };
+  .controller('LeftCtrl', function ($scope) {
+
   })
-  .service("restAPI", function($http, $timeout, $rootScope){
-    var results = [];
-    setResults = function(data){
-      if(data == undefined){
-        data = [];
-      }
-      $rootScope.$broadcast("queryStatus", false);
-      $rootScope.$broadcast("newResultData", []);
-      $timeout(function(){
-        $rootScope.$broadcast("newResultData", data);
-      }, 750);
-
-    }
-    this.getResults = function(){
-      return results;
-    }
-    this.updateResults = function(searchTerm){
-      // Currently query is designed like this:
-      // type: should be always result (since we want judgement results)
-      // size: is the number of results that we want in the response
-      // input: is the users' search query
-      searchTerm = searchTerm.trim();
-      if(searchTerm === ""){
-        console.log("Requested term is empty!");
-        setResults();
-        return;
-      }
-      console.log("Search this term: " + searchTerm);
-      $rootScope.$broadcast("queryStatus", true);
-      var request = {
-        method: 'GET',
-        url: generateSearchURI(5,searchTerm),
-        headers: {
-          'X-Api-Key': "$A$9af4d8381781baccb0f915e554f8798d",
-          'X-Access-Token': "$T$de61425667e2e4ac0884808b769cd042",
+  .service("restAPI", function($http, $timeout, $rootScope, $q){
+    var currentResults = [];
+    this.getResults = function(searchTerm, startIndex){
+      return $q(function(resolve, reject){
+        searchTerm = searchTerm.trim();
+        if(searchTerm === ""){
+          console.log("Requested term is empty!");
+          reject();
+          return;
         }
-      };
-      $http(request).then(function (response) {
-            function compare(a,b) {
-            if (a.similarity > b.similarity)
-              return -1;
-            else if (a.similarity < b.similarity)
-              return 1;
-            else
-              return 0;
-            }
-            //data.sort(compare);
+        if(startIndex === undefined){
+          startIndex = 0;
+        }
+        console.log("Search this term: " + searchTerm);
+        $rootScope.$broadcast("queryStatus", true);
+        var request = {
+          method: 'GET',
+          url: generateSearchURI(REST_API_REQUESTSIZE ,searchTerm, startIndex),
+          headers: {
+            'X-Api-Key': "$A$9af4d8381781baccb0f915e554f8798d",
+            'X-Access-Token': "$T$de61425667e2e4ac0884808b769cd042",
+          }
+        };
+        $http(request).then(function (response) {
+          //Simple similarity sorting function
+          function compare(a,b) {
+          if (a.similarity > b.similarity)
+            return -1;
+          else if (a.similarity < b.similarity)
+            return 1;
+          else
+            return 0;
+          }
 
-            response = response.data.entity;
-            if(!assertIsArray(response)){
-              console.log("Result response is not an array!");
-              setResults();
-              return;
-            }
-            if(!assertArrayNotEmpty(response)){
-              console.log("Result array is empty")
-              setResults();
-              return;
-            }
+          response = response.data.entity;
+          if(!assertCompilation(response)){
+            console.log("Result response is not an array!");
+            reject();
+            return;
+          }
 
-            //Check each element for proper structure and add every fitting one to the processedResponse
-            //ResultContainer structure:
-            // judgement: data
-            // collapsed: bool
-            // similarity: float
-            // userInput: string
-            var processedResponse = [];
-            for(var responseItem of response){
-                if(!assertResultHasProperStructure(responseItem)){
-                  console.log("The following item doesn't have the proper structure", responseItem);
-                } else {
-                  var tempElement = {};
-                  tempElement.judgement = responseItem.judgement;
-                  tempElement.collapsed = false;
-                  tempElement.similarity = responseItem.similarity;
-                  tempElement.userInput = responseItem.userInput
-                  processedResponse.push(tempElement);
-                }
-            }
-            console.log(processedResponse);
-            setResults(processedResponse);
-          });
+          //Check each element for proper structure and add every fitting one to the processedResponse
+          //ResultContainer structure:
+          // judgement: data
+          // collapsed: bool
+          // similarity: float
+          // userInput: string
+          var processedResponse = [];
+          for(var responseItem of response){
+              if(!assertResultHasProperStructure(responseItem)){
+                console.log("The following item doesn't have the proper structure", responseItem);
+              } else {
+                var tempElement = {};
+                tempElement.judgement = responseItem.judgement;
+                tempElement.collapsed = false;
+                tempElement.similarity = responseItem.similarity;
+                tempElement.userInput = responseItem.userInput;
+                processedResponse.push(tempElement);
+              }
+          }
+          //Ensure correct sorting
+          processedResponse.sort(compare);
+          console.log(processedResponse);
+          resolve(processedResponse);
+        }); //END HTTP GET
+      }); //END PROMISE
+    }; //END FATORY FUNCTION
+    this.setVote = function(id, value){
+
     };
+
+    //Helper functions to make result access easier
+    this.notifyResults = function(newResults){
+      if(newResults === undefined){
+        newResults = [];
+      }
+      $rootScope.$broadcast("newResultData", newResults);
+      $rootScope.$broadcast("queryStatus", false);
+    }
+    this.setCurrentResults = function(newResults) {
+      currentResults = newResults;
+    }
+    this.getCurrentResults = function(){
+      return currentResults;
+    }
   });
 
 /*
@@ -302,6 +312,21 @@ function assertResultHasProperStructure(responseItem){
     if(responseItem['judgement'][judgementProperty] === undefined){
       return false;
     }
+  }
+  return true;
+}
+
+/*
+  A compilation of all the asserts to remove some complexity from the request function
+*/
+function assertCompilation(varToCheck){
+  if(!assertIsArray(varToCheck)){
+    console.log("Result response is not an array!");
+    return false;
+  }
+  if(!assertArrayNotEmpty(varToCheck)){
+    console.log("Result array is empty");
+    return false;
   }
   return true;
 }

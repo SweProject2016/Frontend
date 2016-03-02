@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="de">
 <head>
+  <meta charset="utf-8">
   <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
   <link rel="stylesheet" type="text/css" href="./style.css">
   <link rel="stylesheet" href="./bower_components/angular-material/angular-material.css">
@@ -15,7 +15,6 @@
 <body id="appContainer" ng-app="CBSFrontend">
   <div id="bgContainer"></div>
   <div ng-controller="AppCtrl" layout="column" style="height:500px;" ng-cloak>
-
     <!-- SIDE NAV -->
     <md-sidenav class="md-sidenav-left md-whiteframe-z2" md-component-id="left">
       <div ng-controller="SideNavCtrl" id="sideNavContainer">
@@ -32,6 +31,7 @@
           <!--<md-button class="md-primary  md-hue-1">Anmelden</md-button>-->
           <md-button class="md-raised">Fallsuche</md-button>
           <md-button class="md-raised md-warn">Settings</md-button>
+          <md-button ng-click="testMode()" class="md-raised md-warn">Insert test data</md-button>
         </md-content>
       </div>
     </md-sidenav>
