@@ -185,13 +185,11 @@ angular
 
   })
   .controller('AppCtrl', function ($scope, $rootScope, restAPI, $http, $timeout, $log) {
-    /*
     $scope.searchTerm = "test";
     restAPI.getResults("test").then(function(resultData){
       restAPI.setCurrentResults(resultData);
       restAPI.notifyResults(resultData);
     });
-    */
     checkHeartBeat();
     function checkHeartBeat(){
       console.log("Checking Server Status!");

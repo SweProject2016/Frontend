@@ -76,17 +76,43 @@
         <md-card md-whiteframe="12" class="results" ng-repeat="item in results | orderBy:'similarity':true">
           <md-card-title id="resultTitle">
             <md-card-title-text layout="row" flex>
-              <span flex="90" class="md-headline">{{item.judgement.offence}}</span>
-              <div id="resultDateAndComittee" flex="10" class="md-subhead">
-                {{item.judgement.date | date:'EEE, dd.MM.yyyy'}} <br>
-                {{item.judgement.comittee.name}}
+              <span flex="auto" class="md-headline">{{item.judgement.offence}}</span>
+              <div id="dateSectorComittee">
+                <div>
+                  {{item.judgement.date | date:'EEE, dd.MM.yyyy'}}
+                  <md-tooltip md-direction="top">
+                    Datum des Urteils
+                  </md-tooltip>
+                </div>
+                <div>
+                  {{item.judgement.comittee.name}}
+                  <md-tooltip md-direction="top">
+                    Name des entscheidenden Kommitees
+                  </md-tooltip>
+                </div>
+                <div>
+                  {{item.judgement.sector.name}}
+                  <md-tooltip md-direction="top">
+                    Name des Rechtsbereiches
+                  </md-tooltip>
+                </div>
               </div>
             </md-card-title-text>
           </md-card-title>
           <md-progress-linear md-mode="determinate" value="{{item.similarity * 100}}"></md-progress-linear>
-          <md-card-content >
-            Search Input: {{item.userInput}} <br>
-            {{item.judgement.keywords}}
+          <md-card-content layout-align="space-between" layout="row">
+            <div>
+            Search Input: {{item.userInput}}
+          </div>
+        <div>
+          <div ng-repeat="keyword in item.judgement.keywordsAsList">
+            {{keyword}}
+          </div>
+          </div>
+          <md-divider class="vertical-divider"></md-divider>
+          <div>
+            {{item.judgement.sentence}}
+          </div>
           </md-card-content>
           <md-card-actions layout="row" layout-align="space-between">
             <div>
