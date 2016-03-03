@@ -147,8 +147,8 @@ angular
       }
       //First some variables to improve readability
       var doc = $document[0] || $document;
-      console.log($document);
       var scrollPosition;
+      // Firefox uses doc.documentElement, while Chrome uses scrollingElement
       if(doc.scrollingElement === undefined){
         scrollPosition = doc.documentElement.scrollTop;
       } else {
@@ -200,7 +200,7 @@ angular
   .controller('BottomCtrl', function($scope, $http){
 
   })
-  .controller('AppCtrl', function ($scope, $rootScope, restAPI, $http, $timeout, $log) {
+  .controller('AppCtrl', function ($scope, $rootScope, restAPI, $http, $timeout, $log, $mdToast) {
     $scope.searchTerm = "test";
     restAPI.getResults("test").then(function(resultData){
       restAPI.setCurrentResults(resultData);
@@ -226,6 +226,14 @@ angular
       });
       $timeout(checkHeartBeat, 5000);
     }
+    $mdToast.show(
+      $mdToast.simple()
+              .textContent('Scrolle runter um mehr Ergebnisse zu laden!')
+              .action('Verstanden!')
+              .highlightAction(false)
+              .position('top right')
+              .hideDelay(3000)
+    );
   })
   .controller('LeftCtrl', function ($scope) {
 
