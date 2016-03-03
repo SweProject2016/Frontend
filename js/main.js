@@ -1,7 +1,6 @@
 //Constants for REST-API URIs
 REST_API_DOMAIN = "http://it14.tech:8271";
 REST_API_BASEPATH = "/swe/api/";
-
 //
 REST_API_REQUESTSIZE = 5;
 REST_API_STATUS_RUNNING = "RUNNING";
