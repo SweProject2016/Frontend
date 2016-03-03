@@ -145,12 +145,28 @@ angular
             documentElement.body.clientHeight, documentElement.documentElement.clientHeight
         );
       }
-      if(!scrollLock && $document[0].scrollingElement.scrollTop +$window.innerHeight >= getDocHeight($document[0]) - SCROLL_UPDATE_HEIGHT){
-        if(restAPI.getCurrentResults().length > 0){
+      //First some variables to improve readability
+      var doc = $document[0] || $document;
+      console.log($document);
+      var scrollPosition;
+      if(doc.scrollingElement === undefined){
+        scrollPosition = doc.documentElement.scrollTop;
+      } else {
+        scrollPosition = doc.scrollingElement.scrollTop;
+      }
+      var windowHeight = $window.innerHeight;
+
+      if(scrollLock){
+        //When the scroll request lock is active, disregard this event
+        return;
+      }
+      if(scrollPosition + windowHeight >= getDocHeight($document[0]) - SCROLL_UPDATE_HEIGHT){
+        var currRes = restAPI.getCurrentResults();
+        if(currRes.length > 0){
           scrollLock = true;
           //You could use $scope.searchTerm to get the seachterm, but the user could have altered it or removed it entirely
           //so its safer to hijack the first result item and get the searchterm from there
-          restAPI.getResults(restAPI.getCurrentResults()[0].userInput, restAPI.getCurrentResults().length).then(function(resultData){
+          restAPI.getResults(currRes[0].userInput, currRes.length).then(function(resultData){
             restAPI.addToCurrentResults(resultData);
             restAPI.notifyResults(restAPI.getCurrentResults());
             scrollLock = false;
