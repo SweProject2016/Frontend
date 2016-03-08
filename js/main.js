@@ -92,7 +92,7 @@ angular
         .parent(angular.element(document.querySelector('#appContainer')))
         .clickOutsideToClose(true)
         .title('Help for the CBS-Frontend')
-        .textContent('Enter your legal question into the main text-input in the center of the page. Once sent, our system will provide you with related cases.')
+        .textContent('Enter your legal question into the main text-input in the center of the page. Once sent, our system will provide you with related cases.\nREST-API' + ($scope.serverConnectionLost?"Verbindung weg":"Datenbank ok."+($scope.timeLength)))
         .ariaLabel('Help-Dialog for this Webapp')
         .ok('Got it!')
         .targetEvent(ev)
@@ -118,6 +118,7 @@ angular
     var scrollLock = false; //This is set to true, when there is already a scroll-update on the way. Avoids several updates at the same time
     function callUpdateService(){
       $rootScope.$broadcast("queryStatus", true);
+      var x = new Date();
       restAPI.getResults($scope.searchTerm).then(function(resultData){
         restAPI.setCurrentResults();
         restAPI.notifyResults();
@@ -125,6 +126,7 @@ angular
           restAPI.notifyResults(resultData);
           restAPI.setCurrentResults(resultData);
         })
+        $scope.timeLength = (new Date()) - x;
       });
     }
     $scope.retrieveData = callUpdateService;
