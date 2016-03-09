@@ -7,6 +7,7 @@
   <link rel="stylesheet" type="text/css" href="./style.css">
   <link rel="stylesheet" href="./bower_components/angular-material/angular-material.css">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Roboto:400,700' rel='stylesheet' type='text/css'>
 </head>
 <script src="./bower_components/angular/angular.js"></script>
 <script src="./bower_components/angular-aria/angular-aria.js"></script>
@@ -38,7 +39,7 @@
     </md-sidenav>
 
     <!-- WARNING TOOLBAR -->
-    <section class="warningToolbar" ng-if="serverConnectionLost" layout="row">
+    <section class="warningToolbar" ng-if="!serverConnection" layout="row">
       <md-toolbar layout-align="center center" class="md-warn">
         <div>
           Sorry, wir haben offenbar momentan einige technische Probleme :(
@@ -147,16 +148,16 @@
         </div>
         <div>
           <md-button ng-click="toggleInfo()" class="md-icon-button" aria-label="Heartbeat">
-            <md-icon ng-if="!serverConnectionLost" style="color:#2ECC71;font:bold;"  aria-label="favorite" class="material-icons">
+            <md-icon ng-if="serverConnection" style="color:#2ECC71;font:bold;"  aria-label="favorite" class="material-icons">
               favorite
             </md-icon>
-            <md-tooltip ng-if="!serverConnectionLost" md-direction="top">
+            <md-tooltip ng-if="serverConnection" md-direction="top">
               Server Responded!
             </md-tooltip>
-          <md-icon ng-if="serverConnectionLost" style="color:#D35400;font:bold;"  aria-label="favorite" class="material-icons">
+          <md-icon ng-if="!serverConnection" style="color:#D35400;font:bold;"  aria-label="favorite" class="material-icons">
             favorite
           </md-icon>
-          <md-tooltip ng-if="serverConnectionLost" md-direction="top">
+          <md-tooltip ng-if="!serverConnection" md-direction="top">
             Server not responding!
           </md-tooltip>
         </md-button>

@@ -9,7 +9,7 @@
   background-repeat: no-repeat;
 }
 body {
-
+  font-family: 'Roboto', sans-serif;
 }
 #buttonRow {
   height: 110px;

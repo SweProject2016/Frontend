@@ -86,17 +86,46 @@ angular
       // Modal dialogs should fully cover application
       // to prevent interaction outside of dialog
       $log.debug("Info button has been clicked");
+          infoBoxTemplate =
+          '<md-dialog aria-label="List dialog" ng-cloak>' +
+          '<md-toolbar>' +
+          '<div class="md-toolbar-tools">' +
+          '<h2>CBR-System Infobox</h2>' +
+          '</div>' +
+          '</md-toolbar>' +
+          '  <md-dialog-content class="md-padding">' +
+          'Gebe deine Rechtsfrage in das große Textfeld in der Mitte der Seite ein. Ein Ergebnis mit ähnlichen Rechtsfällen wird dir dann geliefert.' +
+          '<br><br>' +
+          'REST-API: {{rest}} <br>' +
+          'Datenbank: {{db}} <br>' +
+          'Durchschnittliche Anfragen-Dauer: {{requestLength}} Millisekunden' +
+          '  </md-dialog-content>' +
+          '  <md-dialog-actions>' +
+          '    <md-button ng-click="closeDialog()" class="md-primary">' +
+          '      Verstanden' +
+          '    </md-button>' +
+          '  </md-dialog-actions>' +
+          '</md-dialog>',
 
-      $mdDialog.show(
-      $mdDialog.alert()
-        .parent(angular.element(document.querySelector('#appContainer')))
-        .clickOutsideToClose(true)
-        .title('Help for the CBS-Frontend')
-        .textContent('Enter your legal question into the main text-input in the center of the page. Once sent, our system will provide you with related cases.\nREST-API' + ($scope.serverConnectionLost?"Verbindung weg":"Datenbank ok."+($scope.timeLength)))
-        .ariaLabel('Help-Dialog for this Webapp')
-        .ok('Got it!')
-        .targetEvent(ev)
-      );
+          infoBoxController = function($scope, restAPI){
+            $scope.closeDialog = function() {
+              $mdDialog.hide();
+            }
+            restAPI.getStatus().then(function(status){
+              var startTime = new Date();
+              restAPI.getResults('test').then(function(){
+                $scope.db = status.db;
+                $scope.rest = status.rest;
+                $scope.requestLength = ((new Date) - startTime);
+              });
+            });
+          }
+       $mdDialog.show({
+         parent: angular.element(document.querySelector('#appContainer')),
+         targetEvent: ev,
+         template: infoBoxTemplate,
+         controller: infoBoxController
+      });
     }
     function displayNotImplemented(ev) {
       $log.debug("Submit button has been clicked");
@@ -118,7 +147,6 @@ angular
     var scrollLock = false; //This is set to true, when there is already a scroll-update on the way. Avoids several updates at the same time
     function callUpdateService(){
       $rootScope.$broadcast("queryStatus", true);
-      var x = new Date();
       restAPI.getResults($scope.searchTerm).then(function(resultData){
         restAPI.setCurrentResults();
         restAPI.notifyResults();
@@ -126,7 +154,6 @@ angular
           restAPI.notifyResults(resultData);
           restAPI.setCurrentResults(resultData);
         })
-        $scope.timeLength = (new Date()) - x;
       });
     }
     $scope.retrieveData = callUpdateService;
@@ -210,20 +237,9 @@ angular
     checkHeartBeat();
     function checkHeartBeat(){
       console.log("Checking Server Status!");
-      $http.get(generateStatusURI()).then(function successCallback(response){
-        response = response.data.entity;
-        if(response.server == REST_API_STATUS_RUNNING && response.databaseStatus ==  REST_API_STATUS_RUNNING){
-          console.log("server is running");
-          $scope.serverConnectionLost = false;
-        } else {
-          console.log("Either one of the servers is down or they replied something unrecognized");
-          console.log(response.data);
-          $scope.serverConnectionLost = true;
-          $rootScope.$broadcast("queryStatus", false)
-        }
-      }, function errorCallback(response) {
-        $scope.serverConnectionLost = true;
-        $rootScope.$broadcast("queryStatus", false);
+      restAPI.getStatus().then(function(currentStatus){
+        console.log("wtf", currentStatus);
+        $scope.serverConnection = currentStatus.rest && currentStatus.db;
       });
       $timeout(checkHeartBeat, 5000);
     }
@@ -241,6 +257,12 @@ angular
   })
   .service("restAPI", function($http, $timeout, $rootScope, $q){
     var currentResults = [];
+    var currentStatus = {
+      'rest' : false,
+      'db' : false
+    };
+    var currentRESTStatus = false;
+    var currentDBStatus = false;
     this.getResults = function(searchTerm, startIndex){
       return $q(function(resolve, reject){
         searchTerm = searchTerm.trim();
@@ -305,6 +327,7 @@ angular
           //Ensure correct sorting
           processedResponse.sort(compare);
           console.log(processedResponse);
+          $rootScope.$broadcast('queryStatus', false);
           resolve(processedResponse);
         }); //END HTTP GET
       }); //END PROMISE
@@ -312,6 +335,39 @@ angular
     this.setVote = function(id, value){
 
     };
+
+    this.getStatus = function(){
+      return $q(function(resolve,reject){
+        $http.get(generateStatusURI()).then(function successCallback(response){
+          console.log(response);
+          response = response.data.entity;
+          currentStatus.rest = false;
+          currentStatus.db = false;
+          if(response.server == REST_API_STATUS_RUNNING){
+            currentStatus.rest = true;
+          }
+          if(response.databaseStatus == REST_API_STATUS_RUNNING){
+            currentStatus.db = true;
+          }
+          if(currentStatus.rest && currentStatus.db){
+            console.log("Server is online");
+            resolve(currentStatus);
+            return;
+          } else {
+            console.log("Either one of the servers is down or they replied something unrecognized");
+            $rootScope.$broadcast("queryStatus", false);
+            resolve(currentStatus);
+            return;
+          }
+        }, function errorCallback(response) {
+          currentStatus.rest = false;
+          currentStatus.db = false;
+          $rootScope.$broadcast("queryStatus", false);
+          console.log("Connection failed");
+          resolve(currentStatus);
+        });
+      });
+    }
 
     //Helper functions to make result access easier
     this.notifyResults = function(newResults){
