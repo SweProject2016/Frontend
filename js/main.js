@@ -229,11 +229,13 @@ angular
 
   })
   .controller('AppCtrl', function ($scope, $rootScope, restAPI, $http, $timeout, $log, $mdToast) {
+    /*
     $scope.searchTerm = "test";
     restAPI.getResults("test").then(function(resultData){
       restAPI.setCurrentResults(resultData);
       restAPI.notifyResults(resultData);
     });
+    */
     checkHeartBeat();
     function checkHeartBeat(){
       console.log("Checking Server Status!");
@@ -258,8 +260,8 @@ angular
   .service("restAPI", function($http, $timeout, $rootScope, $q){
     var currentResults = [];
     var currentStatus = {
-      'rest' : false,
-      'db' : false
+      'rest' : true,
+      'db' : true
     };
     var currentRESTStatus = false;
     var currentDBStatus = false;
