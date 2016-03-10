@@ -1,17 +1,26 @@
-//Constants for REST-API URIs
+//Konstanten für die REST-API
 REST_API_DOMAIN = "http://it14.tech:8271";
 REST_API_BASEPATH = "/swe/api/";
-//
 REST_API_REQUESTSIZE = 5;
 REST_API_STATUS_RUNNING = "RUNNING";
-SEARCH_INPUT_TIMEOUT = 1500;
-SCROLL_UPDATE_HEIGHT = 200; //Distance from the bottom of the page to trigger the loading of more results
-//Constants for the structure of the search results
+
+//Konstanten für das Frontend-Verhalten
+SEARCH_INPUT_TIMEOUT = 1500; //Zeit in Millisekunden, nach keiner weiteren Eingabe im Input Feld, nachdem der Request ausgeführt wird
+SCROLL_UPDATE_HEIGHT = 200; //Abstand zum unteren Ende der Website ab dem neue Elemente geladen werden
+
+//Konstanten für die Struktur der Ergebnisse für die Assertions weiter unten im Code
 RESULT_STRUCUTURE = ["userInput", "similarity", "judgement"];
 JUDGEMENT_STRUCUTRE = ["fileReference", "sentence", "offence", "pdfLink",
   "pdfFileName", "keywords", "comittee", "sector", "date", "pageRank",
   "timestamp", "keywordsAsList"];
 
+/*
+  Erstellt die URL für den HTTP-Request der Ergebnissuche
+  @param numerOfResults Anzahl der Ergebnisse, die die Suche zurückliefern soll
+  @param searchTerm Die Eingabe des Benutzers
+  @param startIndex Die Anzahl von Ergebnissen die übersprungen werden sollen (also weitere Ergebnisse)
+  @return httpRequest Die generierte URL zu den angebenen Parametern
+*/
 function generateSearchURI(numberOfResults, searchTerm, startIndex){
   var httpRequest = REST_API_DOMAIN + REST_API_BASEPATH;
   httpRequest += "sample/get?type=result"; //Set type of response
@@ -21,10 +30,20 @@ function generateSearchURI(numberOfResults, searchTerm, startIndex){
   return httpRequest;
 }
 
+/*
+  Erstellt die URL für den HTTP-Request für eine Statusabfrage
+  @return Die URL für die Statusabfrage der REST-API
+*/
 function generateStatusURI(){
   return REST_API_DOMAIN + REST_API_BASEPATH + "status";
 }
 
+/*
+  Erstellt die URL für den HTTP-Request für das Bewerten von Fällen
+  @param caseID Die eindeutige ID des zu bewertenden Falles
+  @param Die Bewertung des Falles als float
+  @return Die fertige Bewertungs-URL mit den angebenen Parametern
+*/
 function generateVoteURI(caseID, value){
   var httpRequest = REST_API_PROTOCOL + REST_API_BASEPATH + "/sample/vote?";
   httpRequest += "caseid=" + caseID;
@@ -32,119 +51,104 @@ function generateVoteURI(caseID, value){
   return httpRequest;
 }
 
+
 angular
   .module('CBSFrontend', ['ngMaterial'])
   .run(function($http) {
+    /*
+      Wird direkt am Anfang, nach dem Laden des Website ausführt
+    */
     //LOAD COOKIES INTO JS VARS
   })
   .controller('SideNavCtrl', function($scope){
-
+    /*
+      Der Controller für alle Aktionen innerhalb der SideNav
+    */
   })
   .controller('MainInputCtrl', function($scope, $log, restAPI, $http, $timeout, $mdDialog, $mdSidenav ){
-    $scope.toggleLeft = buildDelayedToggler('left');
+    /*
+      Der Controller für die erste Zeile mit den beiden Buttons
+    */
+    $scope.toggleLeft = $mdSidenav('left').toggle;
     $scope.infoClicked = displayInfoBox;
-    /**
-    * Supplies a function that will continue to operate until the
-    * time is up.
+    /*
+      Zeigt die Infobox, einen Dialog mit verschiedenen Informationen, an.
     */
-    function debounce(func, wait, context) {
-      var timer;
-      return function debounced() {
-      var context = $scope,
-          args = Array.prototype.slice.call(arguments);
-      $timeout.cancel(timer);
-      timer = $timeout(function() {
-        timer = undefined;
-        func.apply(context, args);
-      }, wait || 10);
-      };
-    }
-    /**
-    * Build handler to open/close a SideNav; when animation finishes
-    * report completion in console
-    */
-    function buildDelayedToggler(navID) {
-      return debounce(function() {
-      $mdSidenav(navID)
-        .toggle()
-        .then(function () {
-          $log.debug("toggle " + navID + " is done");
-        });
-      }, 200);
-    }
-    function buildToggler(navID) {
-      return function() {
-      $mdSidenav(navID)
-        .toggle()
-        .then(function () {
-          $log.debug("toggle " + navID + " is done");
-        });
-      }
-    }
     function displayInfoBox (ev) {
-      // Appending dialog to document.body to cover sidenav in docs app
-      // Modal dialogs should fully cover application
-      // to prevent interaction outside of dialog
       $log.debug("Info button has been clicked");
-          infoBoxTemplate =
-          '<md-dialog aria-label="List dialog" ng-cloak>' +
-          '<md-toolbar>' +
-          '<div class="md-toolbar-tools">' +
-          '<h2>CBR-System Infobox</h2>' +
-          '</div>' +
-          '</md-toolbar>' +
-          '  <md-dialog-content class="md-padding">' +
-          'Gebe deine Rechtsfrage in das große Textfeld in der Mitte der Seite ein. Ein Ergebnis mit ähnlichen Rechtsfällen wird dir dann geliefert.' +
-          '<br><br>' +
-          'REST-API: {{rest}} <br>' +
-          'Datenbank: {{db}} <br>' +
-          'Durchschnittliche Anfragen-Dauer: {{requestLength}} Millisekunden' +
-          '  </md-dialog-content>' +
-          '  <md-dialog-actions>' +
-          '    <md-button ng-click="closeDialog()" class="md-primary">' +
-          '      Verstanden' +
-          '    </md-button>' +
-          '  </md-dialog-actions>' +
-          '</md-dialog>',
 
-          infoBoxController = function($scope, restAPI){
-            $scope.closeDialog = function() {
-              $mdDialog.hide();
-            }
-            restAPI.getStatus().then(function(status){
-              var startTime = new Date();
-              restAPI.getResults('test').then(function(){
-                $scope.db = status.db;
-                $scope.rest = status.rest;
-                $scope.requestLength = ((new Date) - startTime);
-              });
-            });
-          }
-       $mdDialog.show({
-         parent: angular.element(document.querySelector('#appContainer')),
-         targetEvent: ev,
-         template: infoBoxTemplate,
-         controller: infoBoxController
-      });
+      //Das Template für die Infobox (sollte ausgelagert werden)
+      infoBoxTemplate =
+      '<md-dialog aria-label="List dialog" ng-cloak>' +
+      ' <md-toolbar>' +
+      '   <div class="md-toolbar-tools">' +
+      '     <h2>CBR-System Infobox</h2>' +
+      '   </div>' +
+      ' </md-toolbar>' +
+      ' <md-dialog-content class="md-padding">' +
+      '   Gebe deine Rechtsfrage in das große Textfeld in der Mitte der Seite ein. Ein Ergebnis mit ähnlichen Rechtsfällen wird dir dann geliefert.' +
+      '   <br><br>' +
+      '   REST-API: {{rest}} <br>' +
+      '   Datenbank: {{db}} <br>' +
+      '   Durchschnittliche Anfragen-Dauer: {{requestLength}} Millisekunden' +
+      ' </md-dialog-content>' +
+      ' <md-dialog-actions>' +
+      '  <md-button ng-click="closeDialog()" class="md-primary">' +
+      '   Verstanden' +
+      '  </md-button>' +
+      ' </md-dialog-actions>' +
+      '</md-dialog>';
+
+      //Der Controller für die Infobox
+      infoBoxController = function($scope, restAPI){
+        $scope.closeDialog = function() {
+          $mdDialog.hide();
+        }
+        //Errechnet nach dem Öffnen der Infobox die Antwortzeit und zeigt sie und den Server Status an
+        restAPI.getStatus().then(function(status){
+          var startTime = new Date();
+          restAPI.getResults('test').then(function(){
+            $scope.db = status.db;
+            $scope.rest = status.rest;
+            $scope.requestLength = ((new Date) - startTime);
+          });
+        });
+      };
+     $mdDialog.show({
+       parent: angular.element(document.querySelector('#appContainer')),
+       targetEvent: ev,
+       template: infoBoxTemplate,
+       controller: infoBoxController
+     });
     }
+    /*
+      Zeigt einen Dialog, dass die angeklickte Funktion noch nicht implementiert ist
+    */
     function displayNotImplemented(ev) {
       $log.debug("Submit button has been clicked");
-
       $mdDialog.show(
       $mdDialog.alert()
         .parent(angular.element(document.querySelector('#appContainer')))
         .clickOutsideToClose(true)
-        .title('Not implemented function used!')
-        .textContent('Sorry, this functionality is currently not implemented')
-        .ariaLabel('Function not yet implemented')
-        .ok('Got it!')
+        .title('Noch nicht implementiert!')
+        .textContent('Sorry, diese Funktion ist leider noch nicht implementiert.')
+        .ariaLabel('Funktion nicht implementiert')
+        .ok('Verstanden!')
         .targetEvent(ev)
       );
     }
   })
   .controller('SearchControl', function($scope, $timeout, $rootScope, $document, $window, restAPI){
-    var inputUpdateTimeout; //Timeout for the auto-send
-    var scrollLock = false; //This is set to true, when there is already a scroll-update on the way. Avoids several updates at the same time
+    /*
+      Der Controller für das Suchfeld
+    */
+    var inputUpdateTimeout; //Das Timeout Object für das automatische Senden
+    var scrollLock = false; //Blockt das Anfragen von weiteren Ergebnissen beim Scrollen während bereist neue geladen werden.
+
+    /*
+      Funktion zum Laden einer neuen Suchanfrage.
+      Leert zunächst die geladenen Daten um die Animation auszulösen und füllt sie dann mit den neuen Daten.
+    */
     function callUpdateService(){
       $rootScope.$broadcast("queryStatus", true);
       restAPI.getResults($scope.searchTerm).then(function(resultData){
@@ -159,13 +163,14 @@ angular
     $scope.retrieveData = callUpdateService;
     $scope.inputChanged = function(){
       if(inputUpdateTimeout){
+        //Starte den Timer für das automatische Senden bei Eingabe neu
         clearTimeout(inputUpdateTimeout);
       }
       inputUpdateTimeout = setTimeout(callUpdateService, SEARCH_INPUT_TIMEOUT);
       $rootScope.$broadcast("queryStatus", true);
     };
     $document.on('scroll', function() {
-      //getDocHeight copied from http://james.padolsey.com/javascript/get-document-height-cross-browser/
+      //getDocHeight wurde für Browserkompatibilität von hier kopiert: http://james.padolsey.com/javascript/get-document-height-cross-browser/
       function getDocHeight(documentElement) {
         return Math.max(
             documentElement.body.scrollHeight, documentElement.documentElement.scrollHeight,
@@ -173,10 +178,11 @@ angular
             documentElement.body.clientHeight, documentElement.documentElement.clientHeight
         );
       }
-      //First some variables to improve readability
+      //Zunächst werden einige Hilfsvariablen definiert um die Übersicht zu verbessern
       var doc = $document[0] || $document;
       var scrollPosition;
-      // Firefox uses doc.documentElement, while Chrome uses scrollingElement
+      // Nun wird jeweils für Firefox und Chrome das Scrollende Element gefunden
+      // (Firefox benutzt doc.documentELement während Chrome scrollingElement verwendet)
       if(doc.scrollingElement === undefined){
         scrollPosition = doc.documentElement.scrollTop;
       } else {
@@ -185,21 +191,22 @@ angular
       var windowHeight = $window.innerHeight;
 
       if(scrollLock){
-        //When the scroll request lock is active, disregard this event
+        // Falls ein Scrolllock gesetzt wurde, breche die Anfrage sofort ab
         return;
       }
       if(scrollPosition + windowHeight >= getDocHeight($document[0]) - SCROLL_UPDATE_HEIGHT){
         var currRes = restAPI.getCurrentResults();
         if(currRes.length > 0){
           scrollLock = true;
-          //You could use $scope.searchTerm to get the seachterm, but the user could have altered it or removed it entirely
-          //so its safer to hijack the first result item and get the searchterm from there
+          // Um den searchterm herauszufinden könnte auch $scope.searchTerm verwendet werden. Allerdings besteht die Möglichkeit
+          // dass der Benutzer die Anfrage in irgendeiner Form geändert hat und dann falsche weitere Ergebnisse kommen könnten.
+          // Deshalb wird die Bentuzereingabe aus dem ersten Result Element herausgenommen und wiederverwendet
           restAPI.getResults(currRes[0].userInput, currRes.length).then(function(resultData){
             restAPI.addToCurrentResults(resultData);
             restAPI.notifyResults(restAPI.getCurrentResults());
             scrollLock = false;
           }, function(){
-            //Disable scrollLock regardless of getResults success
+            // Deaktiviere den scrollLock in jedem Fall wieder
             scrollLock = false
           });
       };
@@ -207,6 +214,9 @@ angular
   });
   })
   .controller('ResultCtrl', function($scope, $mdDialog, $interval){
+    /*
+      Controller für die Ergebnisliste
+    */
     $scope.$on("newResultData", function (evt, newData) {
       $scope.results = newData;
     });
@@ -226,9 +236,14 @@ angular
     }
   })
   .controller('BottomCtrl', function($scope, $http){
-
+    /*
+      Controller für die untere Reihe an Buttons und Inhalten
+    */
   })
   .controller('AppCtrl', function ($scope, $rootScope, restAPI, $http, $timeout, $log, $mdToast) {
+    /*
+      Controller für globale Website Funktionalitäten
+    */
     /*
     $scope.searchTerm = "test";
     restAPI.getResults("test").then(function(resultData){
@@ -236,6 +251,7 @@ angular
       restAPI.notifyResults(resultData);
     });
     */
+    $scope.serverConnection = true;
     checkHeartBeat();
     function checkHeartBeat(){
       console.log("Checking Server Status!");
@@ -243,6 +259,7 @@ angular
         console.log("wtf", currentStatus);
         $scope.serverConnection = currentStatus.rest && currentStatus.db;
       });
+      //Führe den Heartbeat-Check im Interval aus
       $timeout(checkHeartBeat, 5000);
     }
     $mdToast.show(
@@ -254,17 +271,16 @@ angular
               .hideDelay(3000)
     );
   })
-  .controller('LeftCtrl', function ($scope) {
-
-  })
   .service("restAPI", function($http, $timeout, $rootScope, $q){
+    /*
+      Der REST-API Service, welcher einen einfachen Zugriff auf die Daten bietet
+
+    */
     var currentResults = [];
     var currentStatus = {
       'rest' : true,
       'db' : true
     };
-    var currentRESTStatus = false;
-    var currentDBStatus = false;
     this.getResults = function(searchTerm, startIndex){
       return $q(function(resolve, reject){
         searchTerm = searchTerm.trim();
@@ -289,7 +305,7 @@ angular
           }
         };
         $http(request).then(function (response) {
-          //Simple similarity sorting function
+          //Einfache similarity Sortier-Funktion
           function compare(a,b) {
           if (a.similarity > b.similarity)
             return -1;
@@ -313,6 +329,15 @@ angular
           // collapsed: bool
           // similarity: float
           // userInput: string
+          /*
+            Hier wird jedes Element auf die richtige Datenstruktur überprüft und in ein gleichmäßiges Format
+            für die Verwendung im Frontend verarbeitet
+            Result Eintrag Struktur:
+            judgement: object
+            collapsed: bool
+            similarity: float
+            userInput: string
+          */
           var processedResponse = [];
           for(var responseItem of response){
               if(!assertResultHasProperStructure(responseItem)){
@@ -326,18 +351,17 @@ angular
                 processedResponse.push(tempElement);
               }
           }
-          //Ensure correct sorting
+          //Stell sicher, dass alle ankommenden Teilergebnisse korrekt sortiert sind
           processedResponse.sort(compare);
           console.log(processedResponse);
           $rootScope.$broadcast('queryStatus', false);
           resolve(processedResponse);
         }); //END HTTP GET
       }); //END PROMISE
-    }; //END FATORY FUNCTION
+    }; //END SERVICE FUNCTION
     this.setVote = function(id, value){
 
     };
-
     this.getStatus = function(){
       return $q(function(resolve,reject){
         $http.get(generateStatusURI()).then(function successCallback(response){
@@ -371,7 +395,7 @@ angular
       });
     }
 
-    //Helper functions to make result access easier
+    //Hilfsfunktionen um den Zugang und Benutzung zu verleichtern
     this.notifyResults = function(newResults){
       if(newResults === undefined){
         newResults = [];
@@ -394,10 +418,13 @@ angular
   });
 
 /*
-  Returns true if the specified variable is an array
+  Überprüft ob eine Variable ein Array ist
+  @param varToCheck Variable die überprüft werden soll
+  @result Ergebnis der Überprüfung
 */
 function assertIsArray(varToCheck) {
-  //You cannot just return Array.isAray(obj) since it could be
+  // Es ist nicht möglich Array.isArray(obj) einfach zurückzugeben, weil die
+  // Variable auch undefined sein könnte
   if(!varToCheck){
     return false;
   }
@@ -408,7 +435,9 @@ function assertIsArray(varToCheck) {
 }
 
 /*
-  Checks whether the inserted array is empty
+  Überprüft ob ein übergebenes Array keine Einträge besitzt
+  @param arrayToCheck Array welches überprüft werden soll
+  @result Ergebnis der Überprüfung
 */
 function assertArrayNotEmpty(arrayToCheck){
   if(arrayToCheck.length > 0){
@@ -418,8 +447,10 @@ function assertArrayNotEmpty(arrayToCheck){
 }
 
 /*
-  Performs a very simple, one layer deep check of the result structure as specified
-  in the constants.
+  Führt eine sehr simple, 1-Ebenen-tiefe Überprüfung des responseItems auf die
+  angebene Struktur durch
+  @param responseItem Das Objekt, dass überprüft werden soll
+  @result Ergebnis der Überprüfung
 */
 function assertResultHasProperStructure(responseItem){
   if(responseItem === undefined){
@@ -439,7 +470,9 @@ function assertResultHasProperStructure(responseItem){
 }
 
 /*
-  A compilation of all the asserts to remove some complexity from the request function
+  Eine Zusammenfassung aller allgemeinen assertions zur einfachen Verwendung
+  @param varToCheck
+  @result Ergebnis der Überprüfungen, wenn eine fehlschlägt, dann ist alles ungültig
 */
 function assertCompilation(varToCheck){
   if(!assertIsArray(varToCheck)){
