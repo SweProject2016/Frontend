@@ -23,8 +23,8 @@ JUDGEMENT_STRUCUTRE = ["fileReference", "sentence", "offence", "pdfLink",
 */
 function generateSearchURI(numberOfResults, searchTerm, startIndex){
   var httpRequest = REST_API_DOMAIN + REST_API_BASEPATH;
-  httpRequest += "sample/get?type=result"; //Set type of response
-  httpRequest += "&size=" + numberOfResults; //Set the number of results
+  httpRequest += "result/get?"; //Set type of response
+  httpRequest += "size=" + numberOfResults; //Set the number of results
   httpRequest += "&input=" + searchTerm; //Set the searchterm
   httpRequest += "&start=" + startIndex;
   return httpRequest;
