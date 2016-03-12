@@ -8,6 +8,9 @@
   background-position: 50% 10%;
   background-repeat: no-repeat;
 }
+.md-toolbar-tools{
+  background: #009688;
+}
 body {
   font-family: 'Roboto', sans-serif;
 }
@@ -20,6 +23,12 @@ body {
   z-index: -2;
   background: #FAFAFA;
   position:absolute;
+}
+.login{
+  margin-top:-30px;
+}
+#anmelden{
+  margin-top:-30px;
 }
 #inputFrame {
   background: #FFFFFF;
@@ -134,3 +143,7 @@ body {
   max-height: 1000px;
   transform: scale(1);
 }
+.footer {
+  position: fixed;
+}
+

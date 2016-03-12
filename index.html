@@ -27,10 +27,10 @@
           <md-input-container>
             <input type="text" name="user" placeholder="Benutzername" ng-model="user" required>
           </md-input-container>
-          <md-input-container>
+          <md-input-container class="login">
             <input type="password" name="pwd" placeholder="Passwort" ng-model="password" required>
           </md-input-container>
-          <!--<md-button class="md-primary  md-hue-1">Anmelden</md-button>-->
+          <md-button id="anmelden" class="md-primary  md-hue-1"><md-icon aria-label="account-circle" class="material-icons">account_circle</md-icon> Anmelden</md-button>
           <md-button class="md-raised">Fallsuche</md-button>
           <md-button class="md-raised md-warn">Settings</md-button>
           <md-button ng-click="testMode()" class="md-raised md-warn">Insert test data</md-button>
@@ -142,7 +142,7 @@
           </md-card-actions>
         </md-card>
       </section>
-      <section layout-align="space-between" layout-padding layout="row" ng-controller="BottomCtrl">
+      <section class="footer" layout-align="space-between" layout-padding layout="row" ng-controller="BottomCtrl">
         <div>
           © 2016 / <a href="./legalinfo.html">Impressum</a>
         </div>
