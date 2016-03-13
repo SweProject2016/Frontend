@@ -26,7 +26,7 @@ function generateSearchURI(numberOfResults, searchTerm, startIndex){
   httpRequest += "result/get?"; //Set type of response
   httpRequest += "size=" + numberOfResults; //Set the number of results
   httpRequest += "&input=" + searchTerm; //Set the searchterm
-  httpRequest += "&start=" + startIndex;
+  httpRequest += "&startindex=" + startIndex;
   return httpRequest;
 }
 

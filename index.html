@@ -144,12 +144,12 @@
       </section>
   </div>
       <div class="footer" layout-align="space-between" layout-padding layout="row" ng-controller="BottomCtrl">
-        <div>
+        <div class="footercontent" layout layout-align="center center">
           © 2016 / <a href="./legalinfo.html">Impressum</a>
         </div>
-          <div layout="row">
+          <div layout="row" class="footercontent" layout-padding>
             <md-button ng-click="toggleInfo()" class="md-icon-button" aria-label="Info">
-            <md-icon ng-if="serverConnection" style="color:#2ECC71;"  aria-label="favorite" class="material-icons">
+            <md-icon ng-if="serverConnection" style="color:#2ECC71;" aria-label="favorite" class="material-icons">
               favorite
             </md-icon>
             <md-tooltip ng-if="serverConnection" md-direction="top">

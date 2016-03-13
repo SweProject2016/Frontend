@@ -156,3 +156,8 @@ body {
   bottom: 0px;
   width: 100%;
 }
+
+.footercontent {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 25px;
+}
