@@ -93,7 +93,7 @@
                   </md-tooltip>
                 </div>
                 <div>
-                  {{item.judgement.sector.name}}
+                  {{item.judgement.lawSector}}
                   <md-tooltip md-direction="top">
                     Name des Rechtsbereiches
                   </md-tooltip>
@@ -142,27 +142,26 @@
           </md-card-actions>
         </md-card>
       </section>
-      <section class="footer" layout-align="space-between" layout-padding layout="row" ng-controller="BottomCtrl">
+  </div>
+      <div class="footer" layout-align="space-between" layout-padding layout="row" ng-controller="BottomCtrl">
         <div>
           © 2016 / <a href="./legalinfo.html">Impressum</a>
         </div>
-        <div>
-          <md-button ng-click="toggleInfo()" class="md-icon-button" aria-label="Heartbeat">
-            <md-icon ng-if="serverConnection" style="color:#2ECC71;font:bold;"  aria-label="favorite" class="material-icons">
+          <div layout="row">
+            <md-button ng-click="toggleInfo()" class="md-icon-button" aria-label="Info">
+            <md-icon ng-if="serverConnection" style="color:#2ECC71;"  aria-label="favorite" class="material-icons">
               favorite
             </md-icon>
             <md-tooltip ng-if="serverConnection" md-direction="top">
-              Server Responded!
+              Server antwortet!
             </md-tooltip>
-          <md-icon ng-if="!serverConnection" style="color:#D35400;font:bold;"  aria-label="favorite" class="material-icons">
+          <md-icon ng-if="!serverConnection" style="color:#D35400;"  aria-label="favorite" class="material-icons">
             favorite
           </md-icon>
           <md-tooltip ng-if="!serverConnection" md-direction="top">
-            Server not responding!
+            Server antwortet nicht!
           </md-tooltip>
         </md-button>
-      </div>
-      <div>
         <md-button ng-href="https://www.facebook.com/pages/Hochschule-f%C3%BCr-Wirtschaft-und-Recht-Berlin/109005462450917?rf=109390362420446" class="md-icon-button" aria-label="Info">
           <md-icon md-svg-src="./assets/facebook_icon.svg" class="icon-s24" aria-label="Facebook"></md-icon>
         </md-button>
@@ -173,8 +172,7 @@
           <md-icon aria-label="email" class="material-icons">email</md-icon>
         </md-button>
       </div>
-    </section>
-  </div>
+      </div>
 </div>
 </body>
 </html>

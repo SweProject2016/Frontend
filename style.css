@@ -8,6 +8,7 @@
   background-position: 50% 10%;
   background-repeat: no-repeat;
 }
+
 .md-toolbar-tools{
   background: #009688;
 }
@@ -52,6 +53,7 @@ body {
 .resultButtons {
   font-weight: bold;
 }
+
 
 .icon-s24 {
   width: 24px;
@@ -98,6 +100,8 @@ body {
   transition: 0.5s linear all;
   max-height: 1000px;
 }
+
+
 .results.ng-leave-active {
     opacity: 0;
     max-height: 0px;
@@ -121,6 +125,7 @@ body {
 .warningToolbar.ng-enter.ng-enter-active {
   opacity: 1;
   max-height: 1000px;
+}
 
 /* ngIf animation */
 .querySpinner.ng-enter,
@@ -143,7 +148,11 @@ body {
   max-height: 1000px;
   transform: scale(1);
 }
+
 .footer {
   position: fixed;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  width: 100%;
 }
-

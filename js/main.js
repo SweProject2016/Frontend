@@ -11,7 +11,7 @@ SCROLL_UPDATE_HEIGHT = 200; //Abstand zum unteren Ende der Website ab dem neue E
 //Konstanten für die Struktur der Ergebnisse für die Assertions weiter unten im Code
 RESULT_STRUCUTURE = ["userInput", "similarity", "judgement"];
 JUDGEMENT_STRUCUTRE = ["fileReference", "sentence", "offence", "pdfLink",
-  "pdfFileName", "keywords", "comittee", "sector", "date", "pageRank",
+  "pdfFileName", "keywords", "comittee", "lawSector", "date", "pageRank",
   "timestamp", "keywordsAsList"];
 
 /*
@@ -151,6 +151,10 @@ angular
     */
     function callUpdateService(){
       $rootScope.$broadcast("queryStatus", true);
+      if(inputUpdateTimeout){
+        //Stoppe den Input Timeout
+        clearTimeout(inputUpdateTimeout);
+      }
       restAPI.getResults($scope.searchTerm).then(function(resultData){
         restAPI.setCurrentResults();
         restAPI.notifyResults();
