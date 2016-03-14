@@ -14,6 +14,7 @@
 <script src="./bower_components/angular-animate/angular-animate.js"></script>
 <script src="./bower_components/angular-material/angular-material.js"></script>
 <script src="./js/main.js"></script>
+<script src="./js/testData.js"></script>
 <body id="appContainer" ng-app="CBSFrontend">
   <div id="bgContainer"></div>
   <div ng-controller="AppCtrl" layout="column" style="height:500px;" ng-cloak>
@@ -31,9 +32,15 @@
             <input type="password" name="pwd" placeholder="Passwort" ng-model="password" required>
           </md-input-container>
           <md-button id="anmelden" class="md-primary  md-hue-1"><md-icon aria-label="account-circle" class="material-icons">account_circle</md-icon> Anmelden</md-button>
-          <md-button class="md-raised">Fallsuche</md-button>
-          <md-button class="md-raised md-warn">Settings</md-button>
-          <md-button ng-click="testMode()" class="md-raised md-warn">Insert test data</md-button>
+          <md-button ng-click="toggleSettings()" id="settingsButton" class="md-raised md-warn">Settings</md-button>
+          <div ng-if="settingsOpen" id="settingsMenu">
+            <md-switch ng-model="useSampleAPI" aria-label="Sample-API verwenden">
+              Sample-API verwenden
+            </md-switch>
+            <md-switch ng-model="useTestData" ng-change="testMode(useTestData)" aria-label="Offline-Testdaten einfügen">
+              Offline-Testdaten einfügen
+            </md-switch>
+        </div>
         </md-content>
       </div>
     </md-sidenav>

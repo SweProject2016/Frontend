@@ -60,10 +60,34 @@ angular
     */
     //LOAD COOKIES INTO JS VARS
   })
-  .controller('SideNavCtrl', function($scope){
+  .controller('SideNavCtrl', function($scope, $rootScope, restAPI){
     /*
       Der Controller für alle Aktionen innerhalb der SideNav
     */
+    $scope.settingsOpen = false;
+    $rootScope.testMode
+    $scope.toggleSettings = function(){
+      $scope.settingsOpen = !$scope.settingsOpen;
+    }
+    $scope.testMode = function(activated){
+      if(testJSONData && activated){
+        //adjustTestDataSimilarity(testJSONData,restAPI.getCurrentResults().length);
+        console.log(testJSONData);
+        restAPI.cleanUpdate(testJSONData);
+      } else {
+        console.log("No Test data was found");
+        restAPI.cleanUpdate();
+      }
+    }
+
+    /*
+      Berechnet eine passende similarity für die Testdaten
+      Die Funktion arbeitet direkt mit der Referenz und benötigt kein return
+    */
+    function adjustTestDataSimilarity(testData, currentLength){
+      for(var result of testData){
+      }
+    }
   })
   .controller('MainInputCtrl', function($scope, $log, restAPI, $http, $timeout, $mdDialog, $mdSidenav ){
     /*
@@ -78,7 +102,7 @@ angular
       $log.debug("Info button has been clicked");
 
       //Das Template für die Infobox (sollte ausgelagert werden)
-      infoBoxTemplate =
+      var infoBoxTemplate =
       '<md-dialog aria-label="List dialog" ng-cloak>' +
       ' <md-toolbar>' +
       '   <div class="md-toolbar-tools">' +
@@ -91,6 +115,9 @@ angular
       '   REST-API: {{rest}} <br>' +
       '   Datenbank: {{db}} <br>' +
       '   Durchschnittliche Anfragen-Dauer: {{requestLength}} Millisekunden' +
+      '   <div id="infoBoxSpinner" class="querySpinner" ng-if="queryInProgress" layout layout-align="center center">' +
+      '     <md-progress-circular md-diameter="42" md-mode="indeterminate"></md-progress-circular>' +
+      '   </div>' +
       ' </md-dialog-content>' +
       ' <md-dialog-actions>' +
       '  <md-button ng-click="closeDialog()" class="md-primary">' +
@@ -104,10 +131,13 @@ angular
         $scope.closeDialog = function() {
           $mdDialog.hide();
         }
+        $scope.$on("queryStatus", function (evt, inProgress) {
+          $scope.queryInProgress = inProgress;
+        });
         //Errechnet nach dem Öffnen der Infobox die Antwortzeit und zeigt sie und den Server Status an
         restAPI.getStatus().then(function(status){
           var startTime = new Date();
-          restAPI.getResults('test').then(function(){
+          restAPI.getResults('tes omg').then(function(){
             $scope.db = status.db;
             $scope.rest = status.rest;
             $scope.requestLength = ((new Date) - startTime);
@@ -156,12 +186,7 @@ angular
         clearTimeout(inputUpdateTimeout);
       }
       restAPI.getResults($scope.searchTerm).then(function(resultData){
-        restAPI.setCurrentResults();
-        restAPI.notifyResults();
-        $timeout(750).then(function(){
-          restAPI.notifyResults(resultData);
-          restAPI.setCurrentResults(resultData);
-        })
+        restAPI.cleanUpdate(resultData);
       });
     }
     $scope.retrieveData = callUpdateService;
@@ -224,9 +249,6 @@ angular
     $scope.$on("newResultData", function (evt, newData) {
       $scope.results = newData;
     });
-    $scope.$on("queryStatus", function (evt, inProgress) {
-      $scope.queryInProgress = inProgress;
-    });
     $scope.pdfClicked = function(fileLink) {
       $mdDialog.show(
       $mdDialog.alert()
@@ -255,6 +277,9 @@ angular
       restAPI.notifyResults(resultData);
     });
     */
+    $scope.$on("queryStatus", function (evt, inProgress) {
+      $scope.queryInProgress = inProgress;
+    });
     $scope.serverConnection = true;
     checkHeartBeat();
     function checkHeartBeat(){
@@ -280,11 +305,16 @@ angular
       Der REST-API Service, welcher einen einfachen Zugriff auf die Daten bietet
 
     */
+
+    //Lokale Service Variablen initialisieren
     var currentResults = [];
     var currentStatus = {
       'rest' : true,
       'db' : true
     };
+    //Mit thisService ist die Referenz auf den Service selber auch innerhalb
+    //der Service-Methoden verwendbar
+    var thisService = this;
     this.getResults = function(searchTerm, startIndex){
       return $q(function(resolve, reject){
         searchTerm = searchTerm.trim();
@@ -309,15 +339,6 @@ angular
           }
         };
         $http(request).then(function (response) {
-          //Einfache similarity Sortier-Funktion
-          function compare(a,b) {
-          if (a.similarity > b.similarity)
-            return -1;
-          else if (a.similarity < b.similarity)
-            return 1;
-          else
-            return 0;
-          }
 
           response = response.data.entity;
           if(!assertCompilation(response)){
@@ -419,6 +440,17 @@ angular
     this.addToCurrentResults = function(newResults){
       currentResults = currentResults.concat(newResults);
     }
+    this.cleanUpdate = function(newResults){
+      if(!newResults){
+        newResults = [];
+      }
+      thisService.setCurrentResults();
+      thisService.notifyResults();
+      return $timeout(750).then(function(){
+        thisService.notifyResults(newResults);
+        thisService.setCurrentResults(newResults);
+      })
+    }
   });
 
 /*
@@ -488,4 +520,14 @@ function assertCompilation(varToCheck){
     return false;
   }
   return true;
+}
+
+//Einfache similarity Sortier-Funktion
+function compare(a,b) {
+if (a.similarity > b.similarity)
+  return -1;
+else if (a.similarity < b.similarity)
+  return 1;
+else
+  return 0;
 }

@@ -140,13 +140,11 @@ body {
 .querySpinner.ng-leave.ng-leave-active {
   opacity: 0;
   max-height: 0px;
-  transform: scale(0);
 }
 .querySpinner.ng-leave,
 .querySpinner.ng-enter.ng-enter-active {
   opacity: 1;
-  max-height: 1000px;
-  transform: scale(1);
+  max-height: 250px;
 }
 
 .footer {
@@ -159,5 +157,39 @@ body {
 
 .footercontent {
   background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 25px;
+  border-radius: 6px;
+}
+
+#settingsButton {
+  margin-bottom: 0px;
+}
+
+#settingsMenu {
+  margin-left: 8px;
+  margin-right: 8px;
+  border-width: thin;
+  border-color: lightgrey;
+  border-style: solid;
+}
+
+/* ngIf animation for settings menu*/
+#settingsMenu.ng-enter,
+#settingsMenu.ng-leave {
+  -webkit-transition: 1s ease-in-out all;
+  -moz-transition: 1s ease-in-out all;
+  -ms-transition: 1s ease-in-out all;
+  -o-transition: 1s ease-in-out all;
+  transition: 1s ease-in-out all;
+}
+#settingsMenu.ng-enter,
+#settingsMenu.ng-leave.ng-leave-active {
+  opacity: 0.99; /* Not sure why opacity has to animated aswell, but relative positioning is broken without */
+  max-height: 0px;
+
+  overflow-y: hidden;
+}
+#settingsMenu.ng-leave,
+#settingsMenu.ng-enter.ng-enter-active {
+  opacity: 1;
+  max-height: 250px;
 }
