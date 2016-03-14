@@ -26,18 +26,21 @@
         </md-toolbar>
         <md-content layout="column" layout-padding>
           <md-input-container>
-            <input type="text" name="user" placeholder="Benutzername" ng-model="user" required>
+            <input type="text" name="user" placeholder="Acess-Token" ng-model="user" required>
           </md-input-container>
           <md-input-container class="login">
-            <input type="password" name="pwd" placeholder="Passwort" ng-model="password" required>
+            <input type="text" name="pwd" placeholder="API-Key" ng-model="password" required>
           </md-input-container>
-          <md-button id="anmelden" class="md-primary  md-hue-1"><md-icon aria-label="account-circle" class="material-icons">account_circle</md-icon> Anmelden</md-button>
-          <md-button ng-click="toggleSettings()" id="settingsButton" class="md-raised md-warn">Settings</md-button>
+          <md-button id="anmelden" class="md-primary  md-hue-1">
+            <md-icon aria-label="account-circle" class="material-icons">account_circle</md-icon>
+            Anmeldedaten Speichern
+          </md-button>
+          <md-button ng-click="toggleSettings()" id="settingsButton" class="md-raised md-warn">Einstellungen</md-button>
           <div ng-if="settingsOpen" id="settingsMenu">
-            <md-switch ng-model="useSampleAPI" aria-label="Sample-API verwenden">
+            <md-switch ng-model="settings.sample" ng-change="apiVersionChanged(settings.sample)"aria-label="Sample-API verwenden">
               Sample-API verwenden
             </md-switch>
-            <md-switch ng-model="useTestData" ng-change="testMode(useTestData)" aria-label="Offline-Testdaten einfügen">
+            <md-switch ng-model="settings.test" ng-change="testMode(settings.test)" aria-label="Offline-Testdaten einfügen">
               Offline-Testdaten einfügen
             </md-switch>
         </div>

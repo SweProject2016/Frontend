@@ -1,6 +1,8 @@
 //Konstanten für die REST-API
 REST_API_DOMAIN = "http://it14.tech:8271";
 REST_API_BASEPATH = "/swe/api/";
+REST_API_RESULTPATH = "result/get?";
+REST_API_RESULTPATHSAMPLE = "sample/get?type=result&";
 REST_API_REQUESTSIZE = 5;
 REST_API_STATUS_RUNNING = "RUNNING";
 
@@ -21,12 +23,16 @@ JUDGEMENT_STRUCUTRE = ["fileReference", "sentence", "offence", "pdfLink",
   @param startIndex Die Anzahl von Ergebnissen die übersprungen werden sollen (also weitere Ergebnisse)
   @return httpRequest Die generierte URL zu den angebenen Parametern
 */
-function generateSearchURI(numberOfResults, searchTerm, startIndex){
+function generateSearchURI(numberOfResults, searchTerm, startIndex, useSampleAPI){
   var httpRequest = REST_API_DOMAIN + REST_API_BASEPATH;
-  httpRequest += "result/get?"; //Set type of response
+  if(useSampleAPI){
+    httpRequest += REST_API_RESULTPATHSAMPLE; //Set type of response
+  } else {
+    httpRequest += REST_API_RESULTPATH; //Set type of response
+  }
   httpRequest += "size=" + numberOfResults; //Set the number of results
   httpRequest += "&input=" + searchTerm; //Set the searchterm
-  httpRequest += "&startindex=" + startIndex;
+  httpRequest += "&index=" + startIndex;
   return httpRequest;
 }
 
@@ -64,13 +70,20 @@ angular
     /*
       Der Controller für alle Aktionen innerhalb der SideNav
     */
+    $scope.settings = {};
     $scope.settingsOpen = false;
-    $rootScope.testMode
+    $scope.sample = false;
+    $scope.test = false;
     $scope.toggleSettings = function(){
       $scope.settingsOpen = !$scope.settingsOpen;
     }
-    $scope.testMode = function(activated){
-      if(testJSONData && activated){
+    $scope.testMode = function(useTestData){
+
+      if($scope.settings.test){
+        $scope.settings.sample = false;
+      }
+      $rootScope.useTestData = useTestData;
+      if(testJSONData && useTestData){
         //adjustTestDataSimilarity(testJSONData,restAPI.getCurrentResults().length);
         console.log(testJSONData);
         restAPI.cleanUpdate(testJSONData);
@@ -78,6 +91,12 @@ angular
         console.log("No Test data was found");
         restAPI.cleanUpdate();
       }
+    }
+    $scope.apiVersionChanged = function(useSampleAPI){
+      if($scope.settings.sample){
+        $scope.settings.test = false;
+      }
+      $rootScope.useSampleAPI = useSampleAPI;
     }
 
     /*
@@ -332,7 +351,7 @@ angular
         $rootScope.$broadcast("queryStatus", true);
         var request = {
           method: 'GET',
-          url: generateSearchURI(REST_API_REQUESTSIZE ,searchTerm, startIndex),
+          url: generateSearchURI(REST_API_REQUESTSIZE ,searchTerm, startIndex, $rootScope.useSampleAPI),
           headers: {
             'X-Api-Key': "$A$9af4d8381781baccb0f915e554f8798d",
             'X-Access-Token': "$T$de61425667e2e4ac0884808b769cd042",
@@ -347,21 +366,14 @@ angular
             reject();
             return;
           }
-
-          //Check each element for proper structure and add every fitting one to the processedResponse
-          //ResultContainer structure:
-          // judgement: data
-          // collapsed: bool
-          // similarity: float
-          // userInput: string
           /*
             Hier wird jedes Element auf die richtige Datenstruktur überprüft und in ein gleichmäßiges Format
             für die Verwendung im Frontend verarbeitet
             Result Eintrag Struktur:
-            judgement: object
-            collapsed: bool
-            similarity: float
-            userInput: string
+              judgement: object
+              collapsed: bool
+              similarity: float
+              userInput: string
           */
           var processedResponse = [];
           for(var responseItem of response){
