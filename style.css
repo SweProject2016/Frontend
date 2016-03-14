@@ -193,3 +193,11 @@ body {
   opacity: 1;
   max-height: 250px;
 }
+
+.fileref {
+  padding-right: 8px;
+  margin-right: 8px;
+  border-right-color: lightgrey;
+  border-right-style: solid;
+  border-right-width: thin;
+}

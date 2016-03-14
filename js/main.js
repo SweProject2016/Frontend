@@ -1,6 +1,7 @@
 //Konstanten für die REST-API
 REST_API_DOMAIN = "http://it14.tech:8271";
 REST_API_BASEPATH = "/swe/api/";
+REST_API_VOTEPATH = "result/rate?"
 REST_API_RESULTPATH = "result/get?";
 REST_API_RESULTPATHSAMPLE = "sample/get?type=result&";
 REST_API_REQUESTSIZE = 5;
@@ -11,7 +12,7 @@ SEARCH_INPUT_TIMEOUT = 1500; //Zeit in Millisekunden, nach keiner weiteren Einga
 SCROLL_UPDATE_HEIGHT = 200; //Abstand zum unteren Ende der Website ab dem neue Elemente geladen werden
 
 //Konstanten für die Struktur der Ergebnisse für die Assertions weiter unten im Code
-RESULT_STRUCUTURE = ["userInput", "similarity", "judgement"];
+RESULT_STRUCUTURE = ["userInput", "similarity", "judgement", "id", "userRating"];
 JUDGEMENT_STRUCUTRE = ["fileReference", "sentence", "offence", "pdfLink",
   "pdfFileName", "keywords", "comittee", "lawSector", "date", "pageRank",
   "timestamp", "keywordsAsList"];
@@ -32,7 +33,7 @@ function generateSearchURI(numberOfResults, searchTerm, startIndex, useSampleAPI
   }
   httpRequest += "size=" + numberOfResults; //Set the number of results
   httpRequest += "&input=" + searchTerm; //Set the searchterm
-  httpRequest += "&index=" + startIndex;
+  httpRequest += "&startindex=" + startIndex;
   return httpRequest;
 }
 
@@ -51,9 +52,9 @@ function generateStatusURI(){
   @return Die fertige Bewertungs-URL mit den angebenen Parametern
 */
 function generateVoteURI(caseID, value){
-  var httpRequest = REST_API_PROTOCOL + REST_API_BASEPATH + "/sample/vote?";
-  httpRequest += "caseid=" + caseID;
-  httpRequest += "&value=" + value;
+  var httpRequest = REST_API_DOMAIN + REST_API_BASEPATH + REST_API_VOTEPATH + "/rate?";
+  httpRequest += "id=" + caseID;
+  httpRequest += "&rating=" + value;
   return httpRequest;
 }
 
@@ -97,6 +98,7 @@ angular
         $scope.settings.test = false;
       }
       $rootScope.useSampleAPI = useSampleAPI;
+      restAPI.cleanUpdate();
     }
 
     /*
@@ -249,19 +251,27 @@ angular
           // Um den searchterm herauszufinden könnte auch $scope.searchTerm verwendet werden. Allerdings besteht die Möglichkeit
           // dass der Benutzer die Anfrage in irgendeiner Form geändert hat und dann falsche weitere Ergebnisse kommen könnten.
           // Deshalb wird die Bentuzereingabe aus dem ersten Result Element herausgenommen und wiederverwendet
-          restAPI.getResults(currRes[0].userInput, currRes.length).then(function(resultData){
-            restAPI.addToCurrentResults(resultData);
+
+          //Normales Laden von der REST-API
+          if(!$rootScope.useTestData){
+            restAPI.getResults(currRes[0].userInput, currRes.length).then(function(resultData){
+              restAPI.addToCurrentResults(resultData);
+              restAPI.notifyResults(restAPI.getCurrentResults());
+              scrollLock = false;
+            }, function(){
+              // Deaktiviere den scrollLock in jedem Fall wieder
+              scrollLock = false
+            })
+          } else {
+            //Laden aus den Testdaten
+            restAPI.addToCurrentResults(testJSONData);
             restAPI.notifyResults(restAPI.getCurrentResults());
-            scrollLock = false;
-          }, function(){
-            // Deaktiviere den scrollLock in jedem Fall wieder
-            scrollLock = false
-          });
+          }
       };
     }
   });
   })
-  .controller('ResultCtrl', function($scope, $mdDialog, $interval){
+  .controller('ResultCtrl', function($scope, restAPI, $mdToast, $mdDialog, $interval){
     /*
       Controller für die Ergebnisliste
     */
@@ -278,6 +288,22 @@ angular
         .ariaLabel('PDF Link')
         .ok('Got it!')
       );
+    }
+    $scope.voteClicked = function(itemid, rating, localResultIndex){
+      restAPI.setVote(itemid, rating).then(function(){
+        $mdToast.show(
+          $mdToast.simple()
+                  .textContent('Der Fall wurde erfolgreich bewertet! Danke für deine Mithilfe')
+                  .action('Kein Problem!')
+                  .highlightAction(false)
+                  .position('top right')
+                  .hideDelay(3000)
+        );
+        if(rating == 0){
+          restAPI.removeFromCurrentResults(localResultIndex);
+          restAPI.notifyResults(restAPI.getCurrentResults());
+        }
+      });
     }
   })
   .controller('BottomCtrl', function($scope, $http){
@@ -385,6 +411,8 @@ angular
                 tempElement.collapsed = false;
                 tempElement.similarity = responseItem.similarity;
                 tempElement.userInput = responseItem.userInput;
+                tempElement.id= responseItem.id;
+                tempElement.userRating = responseItem.userRating;
                 processedResponse.push(tempElement);
               }
           }
@@ -397,7 +425,15 @@ angular
       }); //END PROMISE
     }; //END SERVICE FUNCTION
     this.setVote = function(id, value){
-
+      var request = {
+        method: 'POST',
+        url: generateVoteURI(id,value),
+        headers: {
+          'X-Api-Key': "$A$9af4d8381781baccb0f915e554f8798d",
+          'X-Access-Token': "$T$de61425667e2e4ac0884808b769cd042",
+        }
+      };
+      return $http(request);
     };
     this.getStatus = function(){
       return $q(function(resolve,reject){
@@ -451,6 +487,11 @@ angular
     }
     this.addToCurrentResults = function(newResults){
       currentResults = currentResults.concat(newResults);
+    }
+    this.removeFromCurrentResults = function(indexToRemove){
+      if (indexToRemove > -1) {
+        currentResults.splice(indexToRemove, 1);
+      }
     }
     this.cleanUpdate = function(newResults){
       if(!newResults){

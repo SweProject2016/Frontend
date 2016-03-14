@@ -37,10 +37,10 @@
           </md-button>
           <md-button ng-click="toggleSettings()" id="settingsButton" class="md-raised md-warn">Einstellungen</md-button>
           <div ng-if="settingsOpen" id="settingsMenu">
-            <md-switch ng-model="settings.sample" ng-change="apiVersionChanged(settings.sample)"aria-label="Sample-API verwenden">
+            <md-switch class="md-warn" ng-model="settings.sample" ng-change="apiVersionChanged(settings.sample)"aria-label="Sample-API verwenden">
               Sample-API verwenden
             </md-switch>
-            <md-switch ng-model="settings.test" ng-change="testMode(settings.test)" aria-label="Offline-Testdaten einfügen">
+            <md-switch class="md-warn" ng-model="settings.test" ng-change="testMode(settings.test)" aria-label="Offline-Testdaten einfügen">
               Offline-Testdaten einfügen
             </md-switch>
         </div>
@@ -113,22 +113,24 @@
           </md-card-title>
           <md-progress-linear md-mode="determinate" value="{{item.similarity * 100}}"></md-progress-linear>
           <md-card-content layout-align="space-between" layout="row">
-            <div>
-            Search Input: {{item.userInput}}
-          </div>
-        <div>
-          <div ng-repeat="keyword in item.judgement.keywordsAsList">
-            {{keyword}}
-          </div>
+            <div class="fileref">
+            Aktenzeichen: <br>
+            <b>{{item.judgement.fileReference}}</b>
+            <md-tooltip md-direction="top">
+              Aktenzeichen des Falles
+            </md-tooltip>
           </div>
           <md-divider class="vertical-divider"></md-divider>
           <div>
             {{item.judgement.sentence}}
           </div>
+          <md-tooltip md-direction="top">
+            Urteil des Falles
+          </md-tooltip>
           </md-card-content>
           <md-card-actions layout="row" layout-align="space-between">
             <div>
-              <md-button ng-click="pdfClicked(item.judgement.pdfLink)" class="md-icon-button" aria-label="Info">
+              <md-button ng-href="{{item.judgement.pdfLink}}" target="_blank" class="md-icon-button" aria-label="Info">
                 <md-icon aria-label="picture_as_pdf" class="material-icons">picture_as_pdf</md-icon>
               </md-button>
               <md-tooltip md-direction="top">
@@ -136,13 +138,13 @@
               </md-tooltip>
             </div>
             <div>
-              <md-button class="resultButtons md-primary md-raised md-hue-4">
+              <md-button class="resultButtons md-primary md-raised md-hue-4" ng-click="voteClicked(item.id, 1, results.indexOf(item))">
                 Passend
                 <md-tooltip md-direction="top">
                   Findest du, dass dieses Ergebnis deiner Frage ähnelt?
                 </md-tooltip>
               </md-button>
-              <md-button class="resultButtons md-warn md-raised md-hue-4">
+              <md-button class="resultButtons md-warn md-raised md-hue-4" ng-click="voteClicked(item.id, 0, results.indexOf(item))">
                 Unpassend
                 <md-tooltip md-direction="top">
                   Hat dieses Ergebnis nichts mit deiner Frage zu tun?
