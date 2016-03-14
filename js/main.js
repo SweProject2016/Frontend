@@ -248,6 +248,10 @@ angular
         //Stoppe den Input Timeout
         clearTimeout(inputUpdateTimeout);
       }
+      if($rootScope.useTestData){
+        $rootScope.$broadcast("queryStatus", false);
+        return;
+      }
       restAPI.getResults($scope.searchTerm).then(function(resultData){
         restAPI.cleanUpdate(resultData);
 

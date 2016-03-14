@@ -44,9 +44,9 @@
             <md-switch class="md-warn" ng-model="settings.test" ng-change="testMode(settings.test)" aria-label="Offline-Testdaten einfügen">
               Offline-Testdaten einfügen
             </md-switch>
-        </div>
+        </div><br>
         <md-list  ng-cloak>
-          <md-subheader class="md-no-sticky">Letzten 5 Suchen:</md-subheader>
+          Letzten 5 Suchen:<br>
           <md-list-item ng-repeat="item in lastSearches">
             {{item.searchquery}}
             <md-divider ng-if="!$last"></md-divider>
