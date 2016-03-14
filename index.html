@@ -45,6 +45,13 @@
               Offline-Testdaten einfügen
             </md-switch>
         </div>
+        <md-list  ng-cloak>
+          <md-subheader class="md-no-sticky">Letzten 5 Suchen:</md-subheader>
+          <md-list-item ng-repeat="item in lastSearches">
+            {{item.searchquery}}
+            <md-divider ng-if="!$last"></md-divider>
+          </md-list-item>
+      </md-list>
         </md-content>
       </div>
     </md-sidenav>

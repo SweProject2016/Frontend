@@ -11,6 +11,10 @@ REST_API_STATUS_RUNNING = "RUNNING";
 SEARCH_INPUT_TIMEOUT = 1500; //Zeit in Millisekunden, nach keiner weiteren Eingabe im Input Feld, nachdem der Request ausgeführt wird
 SCROLL_UPDATE_HEIGHT = 200; //Abstand zum unteren Ende der Website ab dem neue Elemente geladen werden
 
+//Konstanten für die Cookies
+COOKIE_APITYPE = "FRONTENDSETTINGS_api"
+COOKIE_LASTSEARCHES = "FRONTENDSETTINGS_lastSearch"
+
 //Konstanten für die Struktur der Ergebnisse für die Assertions weiter unten im Code
 RESULT_STRUCUTURE = ["userInput", "similarity", "judgement", "id", "userRating"];
 JUDGEMENT_STRUCUTRE = ["fileReference", "sentence", "offence", "pdfLink",
@@ -61,20 +65,36 @@ function generateVoteURI(caseID, value){
 
 angular
   .module('CBSFrontend', ['ngMaterial','ngCookies'])
-  .run(function($http) {
+  .run(function($rootScope, $cookies) {
     /*
       Wird direkt am Anfang, nach dem Laden des Website ausführt
     */
     //LOAD COOKIES INTO JS VARS
+    var apitype = $cookies.get(COOKIE_APITYPE);
+
+    //Momentan hardgecoded sollte dynamisch implementiert werden
+    $rootScope.lastSearches = [];
+    for(var i = 0;i<5;i++){
+      if($cookies.get(COOKIE_LASTSEARCHES + i)){
+        $rootScope.lastSearches.push({'searchquery' : $cookies.get(COOKIE_LASTSEARCHES + i)})
+      }
+    }
+    $rootScope.useTestData = false;
+    $rootScope.useSampleAPI = false;
+    $rootScope.accessToken = "";
+    $rootScope.apiKey = "";
+    if(apitype == 1){
+      //SAMPLE API
+      $rootScope.useSampleAPI = true;
+    } else if(apitype == 2){
+      $rootScope.useTestData = true;
+    }
+
   })
-  .controller('SideNavCtrl', function($scope, $rootScope, restAPI){
+  .controller('SideNavCtrl', function($scope, $rootScope, restAPI, $cookies){
     /*
       Der Controller für alle Aktionen innerhalb der SideNav
     */
-    $scope.settings = {};
-    $scope.settingsOpen = false;
-    $scope.sample = false;
-    $scope.test = false;
     $scope.toggleSettings = function(){
       $scope.settingsOpen = !$scope.settingsOpen;
     }
@@ -85,22 +105,44 @@ angular
       }
       $rootScope.useTestData = useTestData;
       if(testJSONData && useTestData){
+        $cookies.put(COOKIE_APITYPE, 2);
         //adjustTestDataSimilarity(testJSONData,restAPI.getCurrentResults().length);
         console.log(testJSONData);
         restAPI.cleanUpdate(testJSONData);
       } else {
         console.log("No Test data was found");
+        $scope.settings.test = false;
+        $cookies.put(COOKIE_APITYPE, 0);
         restAPI.cleanUpdate();
       }
     }
     $scope.apiVersionChanged = function(useSampleAPI){
       if($scope.settings.sample){
         $scope.settings.test = false;
+        $cookies.put(COOKIE_APITYPE, 1);
+      } else {
+        $cookies.put(COOKIE_APITYPE, 0);
       }
       $rootScope.useSampleAPI = useSampleAPI;
       restAPI.cleanUpdate();
     }
 
+    $scope.settings = {};
+    console.log($rootScope.lastSearches);
+    $scope.lastSearches = $rootScope.lastSearches;
+    $scope.settingsOpen = false;
+
+    //INIT COOKIE data
+    if($rootScope.useTestData){
+      $scope.testMode(true);
+      $scope.settings.test = true;
+    } else if ($rootScope.useSampleAPI){
+      $scope.apiVersionChanged(true);
+      $scope.settings.sample = true;
+    }
+    $scope.$on('lastsearchupdate', function(){
+      $scope.lastSearches = $rootScope.lastSearches;
+    })
     /*
       Berechnet eine passende similarity für die Testdaten
       Die Funktion arbeitet direkt mit der Referenz und benötigt kein return
@@ -189,7 +231,7 @@ angular
       );
     }
   })
-  .controller('SearchControl', function($scope, $timeout, $rootScope, $document, $window, restAPI){
+  .controller('SearchControl', function($scope, $timeout, $cookies, $rootScope, $document, $window, restAPI){
     /*
       Der Controller für das Suchfeld
     */
@@ -208,6 +250,25 @@ angular
       }
       restAPI.getResults($scope.searchTerm).then(function(resultData){
         restAPI.cleanUpdate(resultData);
+
+        //Zu den last Searches in den cookies hinzufügen
+        //erst in rootscope
+        if(!$rootScope.lastSearches){
+          return;
+        }
+        if($rootScope.lastSearches.length == 5){
+          $rootScope.lastSearches.pop();
+        }
+        $rootScope.lastSearches.unshift({'searchquery' : $scope.searchTerm});
+        console.log($rootScope.lastSearches);
+
+        //jetzt das gesamte array in die cookies speichern
+        for(var i=0;i<$rootScope.lastSearches.length;i++){
+          $cookies.put(COOKIE_LASTSEARCHES + i, $rootScope.lastSearches[i].searchquery);
+        }
+
+        //nun das update event boradcasten für die SideNav
+        $rootScope.$broadcast("lastsearchupdate");
       });
     }
     $scope.retrieveData = callUpdateService;
