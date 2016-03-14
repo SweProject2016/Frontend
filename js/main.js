@@ -60,7 +60,7 @@ function generateVoteURI(caseID, value){
 
 
 angular
-  .module('CBSFrontend', ['ngMaterial'])
+  .module('CBSFrontend', ['ngMaterial','ngCookies'])
   .run(function($http) {
     /*
       Wird direkt am Anfang, nach dem Laden des Website ausführt
@@ -300,8 +300,15 @@ angular
                   .hideDelay(3000)
         );
         if(rating == 0){
-          restAPI.removeFromCurrentResults(localResultIndex);
+          var tempResults = restAPI.getCurrentResults();
+          tempResults[localResultIndex].collapsed = 2;
+          restAPI.setCurrentResults(tempResults);
           restAPI.notifyResults(restAPI.getCurrentResults());
+          return;
+        } else {
+          var tempResults = restAPI.getCurrentResults();
+          tempResults[localResultIndex].collapsed = 1;
+          restAPI.setCurrentResults(tempResults);
         }
       });
     }
@@ -357,6 +364,7 @@ angular
       'rest' : true,
       'db' : true
     };
+    var currentSize = 0;
     //Mit thisService ist die Referenz auf den Service selber auch innerhalb
     //der Service-Methoden verwendbar
     var thisService = this;
@@ -408,7 +416,7 @@ angular
               } else {
                 var tempElement = {};
                 tempElement.judgement = responseItem.judgement;
-                tempElement.collapsed = false;
+                tempElement.collapsed = 0;
                 tempElement.similarity = responseItem.similarity;
                 tempElement.userInput = responseItem.userInput;
                 tempElement.id= responseItem.id;
@@ -490,7 +498,8 @@ angular
     }
     this.removeFromCurrentResults = function(indexToRemove){
       if (indexToRemove > -1) {
-        currentResults.splice(indexToRemove, 1);
+        //currentResults[indexToRemove] = {};
+        //currentResults.splice(indexToRemove, 1);
       }
     }
     this.cleanUpdate = function(newResults){

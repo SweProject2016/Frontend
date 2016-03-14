@@ -13,6 +13,7 @@
 <script src="./bower_components/angular-aria/angular-aria.js"></script>
 <script src="./bower_components/angular-animate/angular-animate.js"></script>
 <script src="./bower_components/angular-material/angular-material.js"></script>
+<script src="./bower_components/angular-cookies/angular-cookies.js"></script>
 <script src="./js/main.js"></script>
 <script src="./js/testData.js"></script>
 <body id="appContainer" ng-app="CBSFrontend">
@@ -85,7 +86,7 @@
         <div class="querySpinner" ng-if="queryInProgress" layout layout-align="center center">
           <md-progress-circular md-diameter="72" md-mode="indeterminate"></md-progress-circular>
         </div>
-        <md-card md-whiteframe="12" class="results" ng-repeat="item in results | orderBy:'similarity':true">
+        <md-card md-whiteframe="12" class="results" ng-repeat="item in results | orderBy:'similarity':true" ng-if="item.collapsed!=2">
           <md-card-title id="resultTitle">
             <md-card-title-text layout="row" flex>
               <span flex="auto" class="md-headline">{{item.judgement.offence}}</span>
@@ -140,6 +141,7 @@
             <div>
               <md-button class="resultButtons md-primary md-raised md-hue-4" ng-click="voteClicked(item.id, 1, results.indexOf(item))">
                 Passend
+                <md-icon aria-label="account-circle" ng-if="item.collapsed == 1" class="material-icons">done</md-icon>
                 <md-tooltip md-direction="top">
                   Findest du, dass dieses Ergebnis deiner Frage ähnelt?
                 </md-tooltip>
@@ -150,8 +152,8 @@
                   Hat dieses Ergebnis nichts mit deiner Frage zu tun?
                 </md-tooltip>
               </md-button>
-            </div>
           </md-card-actions>
+        </div>
         </md-card>
       </section>
   </div>
