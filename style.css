@@ -93,14 +93,10 @@ body {
   max-height: 1000px;
 }
 
-.results.ng-leave-stagger {
-}
-
 .results.ng-leave {
   transition: 0.5s linear all;
   max-height: 1000px;
 }
-
 
 .results.ng-leave-active {
     opacity: 0;

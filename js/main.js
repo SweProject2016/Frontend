@@ -104,6 +104,7 @@ angular
         $scope.settings.sample = false;
       }
       $rootScope.useTestData = useTestData;
+      $rootScope.useSampleAPI = false;
       if(testJSONData && useTestData){
         $cookies.put(COOKIE_APITYPE, 2);
         //adjustTestDataSimilarity(testJSONData,restAPI.getCurrentResults().length);
@@ -124,6 +125,7 @@ angular
         $cookies.put(COOKIE_APITYPE, 0);
       }
       $rootScope.useSampleAPI = useSampleAPI;
+      $rootScope.useTestData = false;
       restAPI.cleanUpdate();
     }
 

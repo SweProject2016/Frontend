@@ -14,6 +14,7 @@
 <script src="./bower_components/angular-animate/angular-animate.js"></script>
 <script src="./bower_components/angular-material/angular-material.js"></script>
 <script src="./bower_components/angular-cookies/angular-cookies.js"></script>
+<script src="bower_components/angular-i18n/angular-locale_de-de.js"></script>
 <script src="./js/main.js"></script>
 <script src="./js/testData.js"></script>
 <body id="appContainer" ng-app="CBSFrontend">
@@ -105,13 +106,13 @@
                   </md-tooltip>
                 </div>
                 <div>
-                  {{item.judgement.comittee.name}}
+                  {{item.judgement.comittee.name === "bgh" ? "BGH" : "N/A"}}
                   <md-tooltip md-direction="top">
                     Name des entscheidenden Kommitees
                   </md-tooltip>
                 </div>
-                <div>
-                  {{item.judgement.lawSector}}
+                <div><b>
+                  {{item.judgement.lawSector}} </b>
                   <md-tooltip md-direction="top">
                     Name des Rechtsbereiches
                   </md-tooltip>
